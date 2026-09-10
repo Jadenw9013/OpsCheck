@@ -14,6 +14,98 @@ this page includes a check that did not run.
 accurate historical evidence of what was run at the time; they describe superseded suites and, in
 one case, UI that no longer exists. Do not read them as current.
 
+## Presentation redesign, 2026-09-10
+A bounded design retrofit against `opscheck-design-system/`. No engine, contract, fixture, AI
+protocol, model, or provider behaviour changed. **No live Anthropic call was made in this pass.**
+
+### Measured type roles, before and after
+Computed styles at 1366x768, default 16px root, S01 after Run checks.
+
+| Role | Before | After | Target |
+|---|---:|---:|---:|
+| Product title (h1) | 18 / 26.1 | **32 / 40** | 32 / 40 |
+| Tagline | 13 / 18.9 | **16 / 24** | 16 / 24 |
+| Main outcome | not present | **24 / 32** | 24 / 32 |
+| Panel heading | 13 / 18.9 | **20 / 28** | 20 / 28 |
+| Evidence conclusion | 15 / 20.6 | **24 / 32** | 24 / 32 |
+| AI narrative prose | 12.5 / 18.1 | **18 / 28** | 18 / 28 |
+| Body, tabs, statuses | 12.5-13 | **16 / 24** | >=16 |
+| Submitted-plan cell | 12.5 / 18.1 | **16 / 24** | 16 |
+| Order id | 14 / 20.3 | **16 / 24** | 16 |
+| Axis tick | 10 / 14.5 | **14 / 20** | >=14 |
+| Source metadata | 11.5 / 16.7 | **14 / 20** | >=14 |
+
+Nothing visible renders below 14px. The root stays at 16px; no page transform or zoom was used.
+
+### Measured target sizes
+| Control | Before | After | Requirement |
+|---|---:|---:|---:|
+| Run checks | 31px high | **48px** | >=48 |
+| Reset | 32px | **44px** | >=44 |
+| Scenario control | 33px | **44px** | >=44 |
+| AI switch | n/a | **44px** | >=44 |
+| Inspector tab | n/a | **44px** | >=44 |
+| Schedule row | 41px | **60px** | >=56 |
+| Disclosure header | n/a | **60px** | >=44 |
+| Source chip | 26px | **44px** | >=44 |
+
+### Commands actually run
+```text
+npm run typecheck                              -> PASSED
+npm run lint                                   -> PASSED (0 errors, 0 warnings)
+npm test                                       -> PASSED (6 files, 128 tests)
+npm run build                                  -> PASSED
+npx playwright test                            -> PASSED (31 tests)
+node opscheck-design-system/check-contrast.mjs -> PASSED (34/34 token pairs)
+seed sha256                                    -> IDENTICAL for both fixtures
+```
+
+**T02 scope:** the contrast script validates the declared solid token pairs only. It is not a
+rendered-page audit, and the app's live computed pairs were not exhaustively re-measured in every
+state. **T03 (automated axe scan) was NOT RUN** - `@axe-core/playwright` was not installed, so no
+automated accessibility scan was performed in this pass. **T05 text-enlargement to 200% and the
+user text-spacing override stylesheet were NOT RUN.** Keyboard traversal (T04) was not exercised
+end to end. These remain open.
+
+### Layout changes
+Header -> toolbar -> current plan result -> schedule/inspector workspace -> secondary disclosures.
+The plan status moved out of the toolbar into a dedicated "Current plan result" region using plain
+language ("1 modeled violation", "Cannot evaluate this plan.") instead of uppercase status pills.
+The workspace is a 1.25:1 grid with a 432px minimum inspector, stacking below 1280px. Submitted
+plan, raw sources and assumptions became native `<details>` disclosures, removing a nested card
+level. Panels use 24px padding, one 12px radius and one subtle shadow.
+
+### Defects found and fixed during this pass
+1. **Axis tick anchors collapsed at narrow width.** The old narrow-screen rule hid the tick
+   *anchor* rather than its label, so that time position measured at x=0 and the geometry check
+   failed by 168px. The rule was removed: tick density is lower and the timeline scrolls locally,
+   so every label stays at 14px. The alignment fix and all 8 geometry checks still pass.
+2. **Source chips were 26px high**, below the 44px standalone-control requirement.
+3. **320px page overflow of 8px** from a non-wrapping calculation row.
+4. **Axis labels collided** at the new 14px size; tick density was reduced from <=8 to <=5
+   intervals.
+5. Synthetic-data badge was amber, reading as an error; it is now a neutral provenance label.
+
+### Test selectors updated, not weakened
+Ten browser assertions targeted status text that legitimately moved from the toolbar to the new
+result region and changed to plain language. Each was retargeted to the same behavioural meaning
+(for example `Submitted plan has modeled violations` -> `1 modeled violation` inside
+`Current plan result`). No assertion was deleted or loosened, and no fixture or expected engine
+output was touched.
+
+### Screenshots
+Before: `web/artifacts/before/` (1366, 1440, 1024, 390, 320 - S01 after Run checks).
+After: `web/artifacts/after/` same viewports plus `1440-s00-passed.png`, `1440-s02-blocked.png`.
+`1366-s01-ai-report-MOCKED.png` and `1440-s01-ai-report-MOCKED.png` use a **mocked provider**; they
+are not new live-model evidence. All other after-shots ran against a server started with
+`OPSCHECK_AI_ENABLED=false` and an empty key, with a request guard that fails on any provider POST.
+
+### Honest status
+Selected accessibility and design checks passed: measured type roles, measured target sizes,
+declared token-pair contrast, reflow at 320/390/1024, and the geometry regression suite. This is
+**not** a WCAG conformance assessment. No automated accessibility scan, no 200% text-enlargement
+test, no text-spacing override test, and no keyboard-only traversal were run.
+
 ## Visible Claude report (V2 envelope), 2026-09-10
 Run checks now optionally produces a model-authored explanation in a chat-style report, alongside
 the unchanged deterministic result. The V1 evidence contract and its gates are untouched and still

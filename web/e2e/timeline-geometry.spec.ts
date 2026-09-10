@@ -250,7 +250,9 @@ test('scenario copy describes the input change, not the expected outcome', async
   await expect(controls).toContainText('packing duration for order O-104 left blank');
   await expect(controls).not.toContainText('must not run');
 
-  // The conclusion appears only after evaluation.
+  // The conclusion appears only after evaluation, in the result region.
   await page.getByRole('button', { name: 'Run checks' }).click();
-  await expect(controls).toContainText('Plan not evaluated');
+  await expect(page.getByRole('region', { name: 'Current plan result' })).toContainText(
+    'Cannot evaluate this plan.',
+  );
 });

@@ -21,8 +21,9 @@ const BASELINE = /^Baseline/;
 const EARLIER = /^Earlier departure/;
 const MISSING = /^Missing packing duration/;
 
-function statusRegion(page: Page) {
-  return page.getByRole('region', { name: 'Scenario and checks' });
+/** The current plan outcome now has its own region above the workspace. */
+function result(page: Page) {
+  return page.getByRole('region', { name: 'Current plan result' });
 }
 
 function schedule(page: Page) {
@@ -51,9 +52,8 @@ test.beforeEach(async ({ page }) => {
 test('inputs are preloaded but the schedule draws nothing derived before a run', async ({
   page,
 }) => {
-  const status = statusRegion(page);
-  await expect(status.getByText('Ready to check')).toBeVisible();
-  await expect(status.getByText('Plan not evaluated')).toBeVisible();
+  await expect(result(page).getByText('Ready to check the submitted plan.')).toBeVisible();
+  await expect(result(page).getByText('Not evaluated')).toBeVisible();
 
   // The schedule is populated from submitted inputs immediately.
   await expect(schedule(page)).toBeVisible();
@@ -68,15 +68,19 @@ test('inputs are preloaded but the schedule draws nothing derived before a run',
   await expect(page.getByText('Passed implemented checks')).toHaveCount(0);
 
   // Raw source stays reachable, collapsed by default.
-  await expect(page.getByRole('button', { name: /Show raw source records/ })).toBeVisible();
+  // The raw tables are now a labelled disclosure, collapsed by default.
+  await expect(page.getByRole('button', { name: /Raw source records/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Raw source records/ })).toHaveAttribute(
+    'aria-expanded',
+    'false',
+  );
 });
 
 test('baseline reports a pass only after checks actually run', async ({ page }) => {
   await page.getByRole('button', { name: RUN }).click();
 
-  const status = statusRegion(page);
-  await expect(status.getByText('Inputs ready')).toBeVisible();
-  await expect(status.getByText('Passed implemented checks')).toBeVisible();
+  await expect(result(page).getByText('Ready', { exact: true })).toBeVisible();
+  await expect(result(page).getByText('Passed implemented checks.')).toBeVisible();
 
   // The schedule now shows modeled bands and on-time outcomes from the report.
   await expect(legend(page).getByText('Modeled packing')).toBeVisible();
@@ -93,8 +97,7 @@ test('earlier departure shows the ten-minute miss and navigates to a real source
   await scenarioButton(page, EARLIER).click();
   await page.getByRole('button', { name: RUN }).click();
 
-  const status = statusRegion(page);
-  await expect(status.getByText('Submitted plan has modeled violations')).toBeVisible();
+  await expect(result(page).getByText('1 modeled violation')).toBeVisible();
 
   // The schedule marks exactly one late order, and it is O-104.
   await expect(schedule(page).getByText(/min late/)).toHaveCount(1);
@@ -180,9 +183,8 @@ test('missing packing duration blocks evaluation instead of assuming zero', asyn
   await scenarioButton(page, MISSING).click();
   await page.getByRole('button', { name: RUN }).click();
 
-  const status = statusRegion(page);
-  await expect(status.getByText('Missing required data')).toBeVisible();
-  await expect(status.getByText('Plan not evaluated')).toBeVisible();
+  await expect(result(page).getByText('Cannot evaluate this plan.')).toBeVisible();
+  await expect(result(page).getByText('Missing required data')).toBeVisible();
 
   // A blocked dataset must never render an operational pass or a verdict.
   await expect(page.getByText('Passed implemented checks')).toHaveCount(0);
@@ -220,15 +222,14 @@ test('changing the scenario invalidates the previous report and its overlays', a
   page,
 }) => {
   await page.getByRole('button', { name: RUN }).click();
-  const status = statusRegion(page);
-  await expect(status.getByText('Passed implemented checks')).toBeVisible();
+  await expect(result(page).getByText('Passed implemented checks.')).toBeVisible();
   await expect(schedule(page).getByText('on time').first()).toBeVisible();
 
   // Switching inputs must drop the result and every derived overlay with it.
   await scenarioButton(page, EARLIER).click();
-  await expect(status.getByText('Passed implemented checks')).toHaveCount(0);
-  await expect(status.getByText('Inputs changed. Run checks again.')).toBeVisible();
-  await expect(status.getByText('Plan not evaluated')).toBeVisible();
+  await expect(result(page).getByText('Passed implemented checks.')).toHaveCount(0);
+  await expect(result(page).getByText('Inputs changed. Run checks again.')).toBeVisible();
+  await expect(result(page).getByText('Not evaluated')).toBeVisible();
   await expect(schedule(page).getByText('on time')).toHaveCount(0);
   await expect(legend(page).getByText('Modeled packing')).toHaveCount(0);
   await expect(schedule(page).getByText(/min late/)).toHaveCount(0);
@@ -238,22 +239,21 @@ test('changing the scenario invalidates the previous report and its overlays', a
 test('reset returns to a fresh baseline with no carried-over result', async ({ page }) => {
   await scenarioButton(page, EARLIER).click();
   await page.getByRole('button', { name: RUN }).click();
-  const status = statusRegion(page);
-  await expect(status.getByText('Submitted plan has modeled violations')).toBeVisible();
+  await expect(result(page).getByText('1 modeled violation')).toBeVisible();
 
   await page.getByRole('button', { name: RESET }).click();
 
-  await expect(status.getByText('Submitted plan has modeled violations')).toHaveCount(0);
+  await expect(result(page).getByText('1 modeled violation')).toHaveCount(0);
   // Reset replaces the bundle, so it reports a changed input like any other switch.
-  await expect(status.getByText('Inputs changed. Run checks again.')).toBeVisible();
-  await expect(status.getByText('Plan not evaluated')).toBeVisible();
+  await expect(result(page).getByText('Inputs changed. Run checks again.')).toBeVisible();
+  await expect(result(page).getByText('Not evaluated')).toBeVisible();
   await expect(schedule(page).getByText(/min late/)).toHaveCount(0);
   await expect(page.locator('.cell-hit')).toHaveCount(0);
   await expect(page.getByRole('button', { name: RESET })).toBeDisabled();
 
   // Re-running the baseline still produces the baseline outcome.
   await page.getByRole('button', { name: RUN }).click();
-  await expect(status.getByText('Passed implemented checks')).toBeVisible();
+  await expect(result(page).getByText('Passed implemented checks.')).toBeVisible();
 });
 
 test('controls, status, schedule, and the calculation share a laptop viewport', async ({
@@ -266,10 +266,8 @@ test('controls, status, schedule, and the calculation share a laptop viewport', 
   for (const locator of [
     page.getByRole('button', { name: RUN }),
     scenarioButton(page, BASELINE),
-    statusRegion(page).getByText('Inputs ready'),
-    statusRegion(page).getByText('Submitted plan has modeled violations'),
-    orderRow(page, 'O-104'),
-    evidence(page).getByText('Misses departure by 10 min'),
+    result(page).getByText('1 modeled violation'),
+    result(page).getByText('43 passed / 1 failed / 0 blocked'),
   ]) {
     const box = await locator.boundingBox();
     expect(box).not.toBeNull();

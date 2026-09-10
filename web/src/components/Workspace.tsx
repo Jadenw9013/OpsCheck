@@ -12,15 +12,7 @@ import { FindingsList } from './FindingsList';
 import { OrderTimeline } from './OrderTimeline';
 import { PlanTable } from './PlanTable';
 import { SourceViewer } from './SourceViewer';
-import {
-  AlertGlyph,
-  CheckGlyph,
-  ChevronGlyph,
-  IdleGlyph,
-  MissingGlyph,
-  Pill,
-  type Tone,
-} from './ui';
+import { ChevronGlyph, MissingGlyph } from './ui';
 
 /**
  * What each scenario CHANGES about the inputs.
@@ -100,55 +92,42 @@ export function Workspace() {
   }, [invalidationKey]);
 
   return (
-    <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-3 px-3 py-3 sm:px-4">
-      <Header />
+    <div className="mx-auto w-full max-w-[90rem] px-4 py-6 sm:px-8 sm:py-8">
+      <div className="flex flex-col gap-8">
+        <Header />
 
-      <ControlBar
-        scenarioId={c.scenarioId}
-        onSelectScenario={c.selectScenario}
-        onRun={runChecks}
-        onReset={c.resetBaseline}
-        controller={c}
-        briefing={briefing}
-      />
+        <ControlBar
+          scenarioId={c.scenarioId}
+          onSelectScenario={c.selectScenario}
+          onRun={runChecks}
+          onReset={c.resetBaseline}
+          briefing={briefing}
+        />
 
-      {c.evaluationError !== null ? (
-        <p
-          role="alert"
-          className="rounded-lg border border-bad/25 bg-bad-soft px-3.5 py-2.5 text-[12.5px] text-bad"
-        >
-          <strong className="font-semibold">Evaluation could not complete.</strong>{' '}
-          {c.evaluationError} No result is shown, and nothing is reported as passing.
-        </p>
-      ) : null}
+        {c.evaluationError !== null ? (
+          <p
+            role="alert"
+            className="ops-body rounded-xl border border-bad/30 bg-bad-soft px-6 py-4 text-bad"
+          >
+            <strong className="font-semibold">Evaluation could not complete.</strong>{' '}
+            {c.evaluationError} No result is shown, and nothing is reported as passing.
+          </p>
+        ) : null}
 
-      <div className="grid min-h-0 grid-cols-1 gap-3 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <div className="flex min-w-0 flex-col gap-3">
+        <ResultSummary controller={c} />
+
+        {/*
+          The schedule and the explanation are the workspace. Everything else is
+          an inspection tool and sits below in its own disclosures.
+        */}
+        <div className="grid min-h-0 grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.25fr)_minmax(27rem,1fr)] xl:items-start">
           <OrderTimeline
             model={c.timeline}
             hasRun={c.hasRun}
             selectedId={c.selectedFindingId}
             onSelect={selectFinding}
           />
-          <FindingsList
-            report={c.report}
-            groups={c.findings}
-            hasRun={c.hasRun}
-            stale={c.stale}
-            selectedId={c.selectedFindingId}
-            showPassed={c.showPassed}
-            onSelect={selectFinding}
-            onTogglePassed={c.togglePassed}
-          />
-          <PlanTable
-            rows={c.planRows}
-            hasRun={c.hasRun}
-            selectedId={c.selectedFindingId}
-            onSelect={selectFinding}
-          />
-        </div>
 
-        <div className="min-w-0 lg:sticky lg:top-3 lg:max-h-[calc(100vh-1.5rem)] lg:self-start lg:overflow-y-auto">
           <Inspector
             tab={tab}
             onSelectTab={selectTab}
@@ -159,16 +138,194 @@ export function Workspace() {
             onOpenSource={openSource}
           />
         </div>
+
+        <div className="flex flex-col gap-6">
+          <FindingsList
+            report={c.report}
+            groups={c.findings}
+            hasRun={c.hasRun}
+            stale={c.stale}
+            selectedId={c.selectedFindingId}
+            showPassed={c.showPassed}
+            onSelect={selectFinding}
+            onTogglePassed={c.togglePassed}
+          />
+
+          <Disclosure summary="Submitted plan" hint="Every assignment with the values the engine derived.">
+            <PlanTable
+              rows={c.planRows}
+              hasRun={c.hasRun}
+              selectedId={c.selectedFindingId}
+              onSelect={selectFinding}
+            />
+          </Disclosure>
+
+          <SourceSection controller={c} />
+
+          <Assumptions />
+        </div>
       </div>
-
-      <SourceSection controller={c} />
-
-      <Assumptions />
 
       <p aria-live="polite" className="sr-only">
         {c.announcement}
       </p>
     </div>
+  );
+}
+
+/**
+ * One reusable native disclosure for the secondary inspection tools.
+ *
+ * `<details>` gives correct keyboard and screen-reader behaviour without a
+ * hand-rolled widget, and the summary row is a comfortable target.
+ */
+function Disclosure({
+  summary,
+  hint,
+  children,
+  open = false,
+}: {
+  summary: string;
+  hint?: string;
+  children: React.ReactNode;
+  open?: boolean;
+}) {
+  return (
+    <details open={open} className="ops-panel group">
+      <summary className="flex min-h-[3.25rem] cursor-pointer list-none items-center gap-3 px-6 py-4">
+        <span className="text-ink-muted transition-transform group-open:rotate-90">
+          <ChevronGlyph open={false} className="h-4 w-4" />
+        </span>
+        <span className="ops-panel-title text-ink">{summary}</span>
+        {hint ? <span className="ops-meta hidden text-ink-muted sm:inline">{hint}</span> : null}
+      </summary>
+      <div className="border-t border-line">{children}</div>
+    </details>
+  );
+}
+
+/**
+ * The single current outcome, stated plainly.
+ *
+ * Every value here comes from the engine result: the wording is chosen from the
+ * actual status, never from the scenario id, and the counts are the engine's.
+ */
+function ResultSummary({ controller }: { controller: ReturnType<typeof useOpsCheck> }) {
+  const c = controller;
+  const report = c.report;
+  const headline = c.findings.headline;
+
+  let outcome: string;
+  let tone: 'ok' | 'warn' | 'bad' | 'idle' = 'idle';
+  let supporting: string | null = null;
+
+  if (c.stale) {
+    outcome = 'Inputs changed. Run checks again.';
+    tone = 'warn';
+    supporting = 'The previous result no longer describes these inputs.';
+  } else if (!c.hasRun || report === null) {
+    outcome = 'Ready to check the submitted plan.';
+    supporting = 'The schedule below shows the submitted picking times only.';
+  } else if (report.dataStatus !== 'READY') {
+    outcome = 'Cannot evaluate this plan.';
+    tone = 'warn';
+    supporting =
+      headline !== null && headline.kind === 'diagnostic'
+        ? headline.diagnostic.message
+        : 'Required input data is missing or invalid.';
+  } else if (report.planStatus === 'VIOLATIONS') {
+    const n = report.checkCounts.failed;
+    outcome = n + (n === 1 ? ' modeled violation' : ' modeled violations');
+    tone = 'bad';
+    supporting =
+      headline !== null && headline.kind === 'check' ? headline.check.summary : null;
+  } else if (report.planStatus === 'PASS') {
+    outcome = 'Passed implemented checks.';
+    tone = 'ok';
+    supporting = 'No violation was found among the implemented rules on this synthetic data.';
+  } else {
+    outcome = 'Plan not fully evaluated.';
+    tone = 'warn';
+    supporting = 'Some checks were blocked, so the plan has no complete result.';
+  }
+
+  const accent =
+    tone === 'bad'
+      ? 'border-l-bad'
+      : tone === 'ok'
+        ? 'border-l-ok'
+        : tone === 'warn'
+          ? 'border-l-warn'
+          : 'border-l-line-strong';
+
+  return (
+    <section
+      aria-label="Current plan result"
+      className={'ops-panel border-l-4 px-6 py-5 ' + accent}
+    >
+      <div className="flex flex-wrap items-start justify-between gap-x-8 gap-y-4">
+        <div className="min-w-0">
+          <p className="ops-meta font-medium text-ink-muted">Current plan result</p>
+          <h2 className="ops-outcome mt-1 text-ink">{outcome}</h2>
+          {supporting ? (
+            <p className="ops-body mt-2 max-w-[65ch] text-ink-soft">{supporting}</p>
+          ) : null}
+        </div>
+
+        <dl className="flex flex-wrap items-start gap-x-8 gap-y-3">
+          <Stat label="Input data" value={dataStatusText(c)} />
+          <Stat
+            label="Checks"
+            value={
+              report !== null && !c.stale && report.dataStatus === 'READY'
+                ? report.checkCounts.passed +
+                  ' passed / ' +
+                  report.checkCounts.failed +
+                  ' failed / ' +
+                  report.checkCounts.blocked +
+                  ' blocked'
+                : 'Not evaluated'
+            }
+          />
+          <Stat label="Inputs" value={inputSummaryText(c)} />
+        </dl>
+      </div>
+    </section>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="ops-meta font-medium text-ink-muted">{label}</dt>
+      <dd className="ops-body ops-numeric mt-1 font-medium text-ink">{value}</dd>
+    </div>
+  );
+}
+
+function dataStatusText(c: ReturnType<typeof useOpsCheck>): string {
+  if (c.stale) return 'Changed since last run';
+  if (!c.hasRun || c.report === null) return 'Not checked yet';
+  const label: Record<DataStatus, string> = {
+    READY: 'Ready',
+    INCOMPLETE: 'Missing required data',
+    INVALID: 'Invalid data',
+  };
+  const count = c.report.diagnostics.length;
+  return label[c.report.dataStatus] + (count > 0 ? ' (' + count + ')' : '');
+}
+
+function inputSummaryText(c: ReturnType<typeof useOpsCheck>): string {
+  const p = c.preview;
+  return (
+    p.orders.recordCount +
+    ' orders / ' +
+    p.departures.recordCount +
+    ' departures / ' +
+    p.workers.recordCount +
+    ' workers / ' +
+    p.plan.recordCount +
+    ' assignments'
   );
 }
 
@@ -192,11 +349,8 @@ function Inspector({
   const verdict = briefing.response?.briefing?.verdict ?? null;
 
   return (
-    <section
-      aria-label="Inspector"
-      className="flex min-h-0 flex-col rounded-lg border border-line bg-surface shadow-[0_1px_2px_rgba(16,24,40,0.04)]"
-    >
-      <div role="tablist" aria-label="Inspector view" className="flex gap-1 border-b border-line px-2 pt-2">
+    <section aria-label="Inspector" className="ops-panel flex min-h-0 flex-col">
+      <div role="tablist" aria-label="Inspector view" className="flex gap-2 border-b border-line px-4 pt-2">
         {(['ai', 'evidence'] as const).map((id) => {
           const selected = tab === id;
           return (
@@ -208,36 +362,36 @@ function Inspector({
               aria-controls={'inspector-' + id}
               onClick={() => onSelectTab(id)}
               className={
-                'rounded-t-md px-3 py-1.5 text-[12.5px] font-semibold transition-colors ' +
+                'min-h-[2.75rem] rounded-t-md px-4 ops-body font-semibold transition-colors ' +
                 (selected
-                  ? 'border-b-2 border-accent text-accent-strong'
-                  : 'border-b-2 border-transparent text-ink-muted hover:text-ink')
+                  ? 'border-b-[3px] border-accent text-accent-strong'
+                  : 'border-b-[3px] border-transparent text-ink-soft hover:text-ink')
               }
             >
               {id === 'ai' ? 'AI report' : 'Evidence'}
               {id === 'ai' && briefing.busy ? (
-                <span className="ml-1.5 text-[10.5px] font-normal text-ink-muted">working…</span>
+                <span className="ml-1.5 ops-meta font-normal text-ink-muted">working…</span>
               ) : null}
             </button>
           );
         })}
       </div>
 
-      <div id="inspector-ai" role="tabpanel" hidden={tab !== 'ai'} className="min-h-0 px-3 py-3">
+      <div id="inspector-ai" role="tabpanel" hidden={tab !== 'ai'} className="min-h-0 px-6 py-6">
         {tab === 'ai' ? (
           briefing.available ? (
             <AiReportPanel controller={briefing} onOpenSource={onOpenSource} />
           ) : (
-            <div className="text-[12px] text-ink-muted">
+            <div className="ops-body text-ink-soft">
               {verdict ? <PlanStrip verdict={verdict} /> : null}
-              <p className="mt-1">
+              <p className="mt-4 max-w-[65ch]">
                 The AI report is optional and currently{' '}
                 <strong className="font-semibold text-ink-soft">
                   {briefing.config?.enabled ? 'not configured' : 'disabled'}
                 </strong>
                 . Every deterministic check is unaffected.
               </p>
-              <p className="mt-1">
+              <p className="mt-3 max-w-[65ch]">
                 To enable it, set <span className="mono">OPSCHECK_AI_ENABLED</span> and{' '}
                 <span className="mono">ANTHROPIC_API_KEY</span> in{' '}
                 <span className="mono">web/.env.local</span>, then restart the server.
@@ -261,18 +415,22 @@ function Inspector({
 
 function Header() {
   return (
-    <header className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1.5">
-      <div className="flex items-baseline gap-2.5">
-        <h1 className="text-[18px] font-semibold tracking-tight text-ink">OpsCheck</h1>
-        <p className="text-[13px] text-ink-soft">Check the plan. Trace the problem.</p>
+    <header className="flex flex-wrap items-start justify-between gap-x-8 gap-y-3">
+      <div className="min-w-0">
+        <h1 className="ops-title text-ink">OpsCheck</h1>
+        <p className="ops-body mt-1 text-ink-soft">Check the plan. Trace the problem.</p>
       </div>
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-warn/30 bg-warn-soft px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-warn">
-          <MissingGlyph className="h-3 w-3" />
+      {/*
+        Synthetic data is a neutral provenance label, not a warning: an amber
+        treatment here would read as an error state the app is not in.
+      */}
+      <div className="flex flex-col items-start gap-1 sm:items-end">
+        <span className="ops-meta inline-flex items-center gap-2 rounded-full border border-line bg-sunken px-3 py-1 font-medium text-ink-soft">
+          <MissingGlyph className="h-4 w-4" />
           Synthetic data
         </span>
-        <span className="mono text-[10.5px] uppercase tracking-wide text-ink-muted">
-          Independent prototype - No live warehouse integration
+        <span className="ops-meta text-ink-muted">
+          Independent prototype · No live warehouse connection
         </span>
       </div>
     </header>
@@ -284,25 +442,24 @@ function ControlBar({
   onSelectScenario,
   onRun,
   onReset,
-  controller,
   briefing,
 }: {
   scenarioId: string;
   onSelectScenario: (id: string) => void;
   onRun: () => void;
   onReset: () => void;
-  controller: ReturnType<typeof useOpsCheck>;
   briefing: ReturnType<typeof useBriefing>;
 }) {
   const meta = scenarioMeta(scenarioId);
 
   return (
-    <section
-      aria-label="Scenario and checks"
-      className="rounded-lg border border-line bg-surface px-3.5 py-3 shadow-[0_1px_2px_rgba(16,24,40,0.04)]"
-    >
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <div className="flex flex-wrap gap-1.5">
+    <section aria-label="Scenario and checks" className="ops-panel px-6 py-5">
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
+        <div
+          role="group"
+          aria-label="Scenario"
+          className="flex flex-wrap gap-2"
+        >
           {DEMO_SCENARIO_IDS.map((id) => {
             const item = scenarioMeta(id);
             const active = id === scenarioId;
@@ -312,56 +469,41 @@ function ControlBar({
                 type="button"
                 aria-pressed={active}
                 onClick={() => onSelectScenario(id)}
-                className={
-                  'flex items-baseline gap-1.5 rounded-md border px-3 py-1.5 text-[13px] font-semibold transition-colors ' +
-                  (active
-                    ? 'border-accent bg-accent-soft text-accent-strong'
-                    : 'border-line-strong bg-surface text-ink-soft hover:border-accent hover:text-accent')
-                }
+                className={'ops-control' + (active ? ' ops-control--selected' : '')}
               >
                 {item.title}
-                <span className="mono text-[10.5px] font-normal text-ink-muted">{id}</span>
+                <span className="mono ops-meta font-normal text-ink-muted">{id}</span>
               </button>
             );
           })}
         </div>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex flex-wrap items-center gap-3">
           <AiSwitch briefing={briefing} />
           <button
             type="button"
             onClick={onReset}
             disabled={scenarioId === BASELINE_SCENARIO_ID}
-            className="rounded-md border border-line-strong bg-surface px-3 py-1.5 text-[12.5px] font-medium text-ink-soft transition-colors hover:border-ink-muted hover:text-ink disabled:cursor-not-allowed disabled:border-line disabled:text-ink-muted/60"
+            className="ops-control"
           >
             Reset
           </button>
-          <button
-            type="button"
-            onClick={onRun}
-            className="rounded-md bg-accent px-4 py-1.5 text-[13px] font-semibold text-white transition-colors hover:bg-accent-strong"
-          >
+          <button type="button" onClick={onRun} className="ops-control ops-control--primary">
             Run checks
           </button>
         </div>
       </div>
 
-      <p className="mt-1.5 text-[11.5px] text-ink-muted">
+      <p className="ops-body mt-4 max-w-[65ch] text-ink-soft">
         {SCENARIO_INPUT_SUMMARY[scenarioId] ?? meta.description}
       </p>
 
       {briefing.available && briefing.includeAi ? (
-        <p className="mt-1 text-[11px] text-warn">
+        <p className="ops-meta mt-2 text-warn">
           With AI on, Run checks sends this synthetic scenario’s evidence to Anthropic and may
           incur API charges.
         </p>
       ) : null}
-
-      <div className="mt-2.5 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-line pt-2.5">
-        <StatusSummary label="Data" {...dataStatusView(controller)} />
-        <StatusSummary label="Plan" {...planStatusView(controller)} />
-        <InputSummary controller={controller} />
-      </div>
     </section>
   );
 }
@@ -384,124 +526,24 @@ function AiSwitch({ briefing }: { briefing: ReturnType<typeof useBriefing> }) {
           : 'One Run checks click sends one request to Anthropic.'
       }
       onClick={() => briefing.setIncludeAi(!on)}
-      className={
-        'flex items-center gap-2 rounded-md border px-2.5 py-1.5 text-[12px] font-medium transition-colors ' +
-        (disabled
-          ? 'cursor-not-allowed border-line bg-sunken text-ink-muted/70'
-          : on
-            ? 'border-accent bg-accent-soft text-accent-strong'
-            : 'border-line-strong bg-surface text-ink-soft hover:border-accent hover:text-accent')
-      }
+      className={'ops-control' + (on ? ' ops-control--selected' : '')}
     >
       <span
         aria-hidden="true"
         className={
-          'relative h-3.5 w-6 rounded-full transition-colors ' +
+          'relative h-5 w-9 shrink-0 rounded-full transition-colors ' +
           (on ? 'bg-accent' : 'bg-line-strong')
         }
       >
         <span
           className={
-            'absolute top-0.5 h-2.5 w-2.5 rounded-full bg-white transition-all ' +
-            (on ? 'left-3' : 'left-0.5')
+            'absolute top-1 h-3 w-3 rounded-full bg-white transition-all ' +
+            (on ? 'left-5' : 'left-1')
           }
         />
       </span>
       Include AI report
     </button>
-  );
-}
-
-interface StatusView {
-  tone: Tone;
-  text: string;
-  detail?: string;
-}
-
-function dataStatusView(c: ReturnType<typeof useOpsCheck>): StatusView {
-  if (c.stale) return { tone: 'warn', text: 'Inputs changed. Run checks again.' };
-  if (!c.hasRun || c.report === null) return { tone: 'idle', text: 'Ready to check' };
-
-  const label: Record<DataStatus, StatusView> = {
-    READY: { tone: 'ok', text: 'Inputs ready' },
-    INCOMPLETE: { tone: 'warn', text: 'Missing required data' },
-    INVALID: { tone: 'bad', text: 'Invalid input data' },
-  };
-  const view = label[c.report.dataStatus];
-  const count = c.report.diagnostics.length;
-  return count === 0
-    ? view
-    : { ...view, detail: count + (count === 1 ? ' problem' : ' problems') + ' reported' };
-}
-
-function planStatusView(c: ReturnType<typeof useOpsCheck>): StatusView {
-  if (c.evaluationError !== null) {
-    return { tone: 'bad', text: 'Evaluation could not complete' };
-  }
-  if (c.stale || !c.hasRun || c.report === null) {
-    return { tone: 'idle', text: 'Plan not evaluated' };
-  }
-  const { report } = c;
-  if (report.dataStatus !== 'READY') {
-    return {
-      tone: 'warn',
-      text: 'Plan not evaluated',
-      detail: 'resolve the input issues first',
-    };
-  }
-  const counts = report.checkCounts;
-  const detail =
-    counts.passed + ' passed / ' + counts.failed + ' failed / ' + counts.blocked + ' blocked';
-
-  if (report.planStatus === 'VIOLATIONS') {
-    return { tone: 'bad', text: 'Submitted plan has modeled violations', detail };
-  }
-  if (report.planStatus === 'NOT_EVALUATED') {
-    return { tone: 'warn', text: 'Plan not fully evaluated', detail };
-  }
-  return { tone: 'ok', text: 'Passed implemented checks', detail };
-}
-
-function StatusSummary({ label, tone, text, detail }: StatusView & { label: string }) {
-  const glyph =
-    tone === 'ok' ? (
-      <CheckGlyph />
-    ) : tone === 'bad' ? (
-      <AlertGlyph />
-    ) : tone === 'warn' ? (
-      <MissingGlyph />
-    ) : (
-      <IdleGlyph />
-    );
-
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-muted">
-        {label}
-      </span>
-      <Pill tone={tone} glyph={glyph}>
-        {text}
-      </Pill>
-      {detail ? <span className="mono text-[11.5px] text-ink-muted">{detail}</span> : null}
-    </div>
-  );
-}
-
-function InputSummary({ controller }: { controller: ReturnType<typeof useOpsCheck> }) {
-  const p = controller.preview;
-  const parts = [
-    p.orders.recordCount + ' orders',
-    p.departures.recordCount + ' departures',
-    p.workers.recordCount + ' workers',
-    p.plan.recordCount + ' assignments',
-  ];
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-muted">
-        Inputs
-      </span>
-      <span className="mono text-[11.5px] text-ink-soft">{parts.join(' / ')}</span>
-    </div>
   );
 }
 
@@ -514,28 +556,32 @@ function SourceSection({ controller }: { controller: ReturnType<typeof useOpsChe
   const { sourceExpanded, toggleSource } = controller;
 
   return (
-    <section aria-label="Raw source" className="flex flex-col gap-2">
+    <section aria-label="Raw source" className="ops-panel">
       <button
         type="button"
         onClick={toggleSource}
         aria-expanded={sourceExpanded}
         aria-controls="source-viewer"
-        className="flex items-center gap-2 self-start rounded-md border border-line-strong bg-surface px-3 py-1.5 text-[12.5px] font-medium text-ink-soft transition-colors hover:border-accent hover:text-accent"
+        className="flex min-h-[3.25rem] w-full items-center gap-3 px-6 py-4 text-left"
       >
-        <ChevronGlyph open={sourceExpanded} />
-        {sourceExpanded ? 'Hide raw source records' : 'Show raw source records'}
-        <span className="mono text-[11px] font-normal text-ink-muted">
+        <span className="text-ink-muted">
+          <ChevronGlyph open={sourceExpanded} className="h-4 w-4" />
+        </span>
+        <span className="ops-panel-title text-ink">Raw source records</span>
+        <span className="ops-meta hidden text-ink-muted sm:inline">
           orders, departures, workers, plan
         </span>
       </button>
 
       {sourceExpanded ? (
-        <SourceViewer
-          preview={controller.preview}
-          activeTable={controller.sourceTable}
-          target={controller.sourceTarget}
-          onSelectTable={controller.selectSourceTable}
-        />
+        <div className="border-t border-line">
+          <SourceViewer
+            preview={controller.preview}
+            activeTable={controller.sourceTable}
+            target={controller.sourceTarget}
+            onSelectTable={controller.selectSourceTable}
+          />
+        </div>
       ) : null}
     </section>
   );
@@ -543,21 +589,25 @@ function SourceSection({ controller }: { controller: ReturnType<typeof useOpsChe
 
 function Assumptions() {
   return (
-    <footer className="rounded-lg border border-line bg-sunken px-3.5 py-2.5 text-[11.5px] leading-relaxed text-ink-muted">
-      <p>
-        <span className="font-semibold text-ink-soft">Assumptions.</span> Time is an integer minute
-        offset from a synthetic 08:00 on a single day; there are no dates, time zones, or overnight
-        shifts. Worker intervals are half-open, so an assignment ending at the minute another
-        begins does not overlap. Packing is modeled as a fixed delay starting the moment picking
-        ends, with unlimited packing capacity: no queue, staging, loading, or transport is modeled.
-      </p>
-      <p className="mt-1.5">
-        <span className="font-semibold text-ink-soft">Limits.</span> OpsCheck checks a plan that was
-        submitted to it. It does not build, optimize, or repair a plan, and a passing report means
-        only that the five implemented rules found no violation in this synthetic data. It does not
-        establish optimality, real-world feasibility, safety, or that no better alternative exists.
-        All inputs here are synthetic and this prototype has no connection to any live system.
-      </p>
-    </footer>
+    <Disclosure summary="Assumptions and modeling limits">
+      <div className="ops-body space-y-4 px-6 py-5 text-ink-soft">
+        <p className="max-w-[65ch]">
+          Time is an integer minute offset from a synthetic 08:00 on a single day; there are no
+          dates, time zones, or overnight shifts. Worker intervals are half-open, so an assignment
+          ending at the minute another begins does not overlap.
+        </p>
+        <p className="max-w-[65ch]">
+          Packing is modeled as a fixed delay starting the moment picking ends, with unlimited
+          packing capacity: no queue, staging, loading, or transport is modeled.
+        </p>
+        <p className="max-w-[65ch]">
+          OpsCheck checks a plan that was submitted to it. It does not build, optimize, or repair a
+          plan, and a passing report means only that the five implemented rules found no violation
+          in this synthetic data. It does not establish optimality, real-world feasibility, safety,
+          or that no better alternative exists. All inputs here are synthetic and this prototype has
+          no connection to any live system.
+        </p>
+      </div>
+    </Disclosure>
   );
 }

@@ -81,15 +81,15 @@ export function EvidencePanel({
       <Panel
         title="Evidence"
         subtitle="Named inputs, the calculation, and the raw source cells behind a finding."
-        bodyClassName="flex items-center justify-center px-5 py-8"
+        bodyClassName="px-6 pb-6"
       >
         <div className="max-w-[38ch] text-center">
-          <p className="text-[12.5px] text-ink-soft">
+          <p className="ops-body text-ink-soft">
             {hasRun
               ? 'Select an order in the schedule, or a finding below, to see the inputs behind it.'
               : 'Nothing has been evaluated yet.'}
           </p>
-          <p className="mt-1.5 text-[11.5px] text-ink-muted">
+          <p className="mt-1.5 ops-meta text-ink-muted">
             {hasRun
               ? 'Every value shown here comes from the evaluated report, and each one links to the exact source cell it was read from.'
               : 'Choose Run checks. The schedule above shows only the submitted picking times until then.'}
@@ -103,7 +103,7 @@ export function EvidencePanel({
     <Panel
       title="Evidence"
       subtitle="Named inputs, the calculation, and the raw source cells behind this finding."
-      bodyClassName="scroll-panel px-3.5 py-3"
+      bodyClassName="px-6 pb-6"
     >
       {finding.kind === 'diagnostic' ? (
         <DiagnosticEvidence diagnostic={finding.diagnostic} onOpenSource={onOpenSource} />
@@ -125,7 +125,7 @@ function DiagnosticEvidence({
   const note = CODE_NOTE[diagnostic.code];
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-5">
       <div className="flex flex-wrap items-center gap-2">
         <Pill
           tone={diagnostic.kind === 'INVALID_DATA' ? 'bad' : 'warn'}
@@ -133,20 +133,20 @@ function DiagnosticEvidence({
         >
           {diagnostic.kind === 'INVALID_DATA' ? 'Invalid data' : 'Missing data'}
         </Pill>
-        <code className="mono rounded bg-sunken px-1.5 py-0.5 text-[11.5px] text-ink-soft">
+        <code className="mono rounded bg-sunken px-1.5 py-0.5 ops-meta text-ink-soft">
           {diagnostic.code}
         </code>
       </div>
 
       <div className="rounded-md border border-warn/30 bg-warn-soft/60 px-3 py-2.5">
-        <h3 className="text-[16px] font-semibold leading-snug text-ink">
+        <h3 className="ops-outcome font-semibold text-ink">
           Cannot evaluate this plan
         </h3>
-        <p className="mt-1 text-[13px] font-medium text-ink-soft">{headline}</p>
+        <p className="mt-1 ops-body font-medium text-ink-soft">{headline}</p>
       </div>
 
-      {rest ? <p className="text-[12.5px] text-ink-soft">{rest}</p> : null}
-      {note ? <p className="text-[12.5px] text-ink-muted">{note}</p> : null}
+      {rest ? <p className="ops-body text-ink-soft">{rest}</p> : null}
+      {note ? <p className="ops-body text-ink-muted">{note}</p> : null}
 
       {diagnostic.source ? (
         <SourceCard
@@ -155,22 +155,22 @@ function DiagnosticEvidence({
           onOpenSource={onOpenSource}
         />
       ) : (
-        <p className="rounded-md border border-line bg-sunken px-3 py-2 text-[12.5px] text-ink-muted">
+        <p className="rounded-md border border-line bg-sunken px-3 py-2 ops-body text-ink-muted">
           This problem is about the {diagnostic.table} table as a whole, so there is no single
           source cell to open.
         </p>
       )}
 
       {diagnostic.relatedRecordNumbers && diagnostic.relatedRecordNumbers.length > 0 ? (
-        <p className="text-[12.5px] text-ink-soft">
+        <p className="ops-body text-ink-soft">
           All affected records:{' '}
           <span className="mono">{diagnostic.relatedRecordNumbers.join(', ')}</span>
         </p>
       ) : null}
 
       {diagnostic.relatedSources.length > 0 ? (
-        <div className="space-y-2">
-          <h4 className="text-[11px] font-semibold uppercase tracking-wide text-ink-muted">
+        <div className="space-y-3">
+          <h4 className="ops-body font-semibold text-ink">
             Related source cells
           </h4>
           {diagnostic.relatedSources.map((source, index) => (
@@ -184,7 +184,7 @@ function DiagnosticEvidence({
         </div>
       ) : null}
 
-      <p className="border-t border-line pt-2.5 text-[11.5px] text-ink-muted">
+      <p className="border-t border-line pt-2.5 ops-meta text-ink-muted">
         While input data is not ready, all five plan rule families are blocked. A blocked rule is
         not a passed rule.
       </p>
@@ -219,21 +219,21 @@ function CheckEvidence({
   const hasMetrics = Object.keys(check.metrics).length > 0;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-5">
       <div className="flex flex-wrap items-center gap-2">
         <Pill tone={tone} glyph={glyph}>
           {statusText}
         </Pill>
-        <code className="mono rounded bg-sunken px-1.5 py-0.5 text-[11.5px] text-ink-soft">
+        <code className="mono rounded bg-sunken px-1.5 py-0.5 ops-meta text-ink-soft">
           {check.ruleId}
         </code>
-        <span className="text-[11.5px] text-ink-muted">{RULE_LABEL[check.ruleId]}</span>
+        <span className="ops-meta text-ink-muted">{RULE_LABEL[check.ruleId]}</span>
       </div>
 
-      <h3 className="text-[15px] font-semibold leading-snug text-ink">{check.summary}</h3>
+      <h3 className="ops-outcome font-semibold text-ink">{check.summary}</h3>
 
       {check.status === 'BLOCKED' && check.blockedBy.length > 0 ? (
-        <p className="rounded-md border border-warn/25 bg-warn-soft px-3 py-2 text-[12.5px] text-warn">
+        <p className="rounded-md border border-warn/25 bg-warn-soft px-3 py-2 ops-body text-warn">
           Blocked by <span className="mono">{check.blockedBy.join(', ')}</span>. No readiness time
           was calculated, and no assignment was implicitly chosen.
         </p>
@@ -245,17 +245,17 @@ function CheckEvidence({
 
       {!isReadiness && check.formula ? (
         <div>
-          <h4 className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-ink-muted">
+          <h4 className="ops-body mb-2 font-semibold text-ink">
             Calculation
           </h4>
-          <p className="mono rounded-md border border-line bg-sunken px-3 py-2 text-[13px] text-ink">
+          <p className="mono rounded-md border border-line bg-sunken px-3 py-2 ops-body text-ink">
             {check.formula}
           </p>
         </div>
       ) : null}
 
       {hasMetrics && !isReadiness ? (
-        <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-[12.5px]">
+        <dl className="grid grid-cols-2 gap-x-3 gap-y-1 ops-body">
           {Object.entries(check.metrics).map(([name, value]) => (
             <div key={name} className="flex items-baseline justify-between gap-2">
               <dt className="text-ink-muted">{humanizeMetric(name)}</dt>
@@ -266,8 +266,8 @@ function CheckEvidence({
       ) : null}
 
       {check.operands.length > 0 ? (
-        <div className="space-y-2">
-          <h4 className="text-[11px] font-semibold uppercase tracking-wide text-ink-muted">
+        <div className="space-y-3">
+          <h4 className="ops-body font-semibold text-ink">
             Named inputs and source records
           </h4>
           {check.operands.map((operand, index) => (
@@ -277,7 +277,7 @@ function CheckEvidence({
       ) : null}
 
       {isReadiness ? (
-        <p className="border-t border-line pt-2.5 text-[11.5px] text-ink-muted">
+        <p className="border-t border-line pt-2.5 ops-meta text-ink-muted">
           {PACKING_CAVEAT}
         </p>
       ) : null}
@@ -306,7 +306,7 @@ function ReadinessCalculation({
   const late = typeof m.lateMinutes === 'number' && m.lateMinutes > 0;
 
   return (
-    <div className="rounded-md border border-line bg-sunken px-3 py-2.5">
+    <div className="ops-inset px-5 py-4">
       <ChainRow
         op=""
         label="Picking complete"
@@ -342,7 +342,7 @@ function ReadinessCalculation({
 
       <p
         className={
-          'mt-2 rounded border px-2.5 py-1.5 text-[13px] font-semibold ' +
+          'mt-2 rounded border px-2.5 py-1.5 ops-body font-semibold ' +
           (late
             ? 'border-bad/30 bg-bad-soft text-bad'
             : 'border-ok/30 bg-ok-soft text-ok')
@@ -353,12 +353,12 @@ function ReadinessCalculation({
           : 'Ready ' + m.slackMinutes + ' min before departure'}
       </p>
 
-      <p className="mono mt-2 border-t border-line pt-2 text-[12px] text-ink-muted">
+      <p className="mono mt-2 border-t border-line pt-2 ops-body text-ink-muted">
         {check.formula}
       </p>
 
       {formatClock(m.readyMinute) === null ? (
-        <p className="mt-1.5 text-[11.5px] text-warn">
+        <p className="mt-1.5 ops-meta text-warn">
           The modeled ready minute falls outside the modeled 0-720 window, so no clock time is
           shown for it.
         </p>
@@ -400,36 +400,33 @@ function ChainRow({
   const secondary = kind === 'clock' ? minute + ' min' : '';
 
   return (
-    <div className="flex items-baseline gap-2 py-[3px]">
-      <span className="mono w-3 shrink-0 text-[13px] text-ink-muted">{op}</span>
-      <span className={'flex-1 text-[12.5px] ' + (emphasis ? 'text-ink' : 'text-ink-soft')}>
+    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 py-1">
+      <span className="mono w-3 shrink-0 ops-body text-ink-muted">{op}</span>
+      <span className={'flex-1 ops-body ' + (emphasis ? 'text-ink' : 'text-ink-soft')}>
         {label}
       </span>
       <span
         className={
           'mono tabular-nums ' +
-          (emphasis ? 'text-[15px] font-bold text-ink' : 'text-[13.5px] font-semibold text-ink')
+          (emphasis ? 'ops-outcome font-bold text-ink' : 'ops-body font-semibold text-ink')
         }
       >
         {primary}
       </span>
-      <span className="mono w-12 shrink-0 text-right text-[11px] tabular-nums text-ink-muted">
+      <span className="mono shrink-0 whitespace-nowrap text-right ops-meta tabular-nums text-ink-muted">
         {secondary}
       </span>
       {operand && onOpenSource ? (
         <button
           type="button"
           onClick={() => onOpenSource(operand.source)}
-          // The visible chip is terse, so the control needs a full spoken name.
           aria-label={sourceChipLabel(operand)}
           title={sourceChipLabel(operand)}
-          className="mono shrink-0 rounded border border-line-strong bg-surface px-1.5 py-0.5 text-[10px] text-accent transition-colors hover:border-accent hover:bg-accent-soft"
+          className="mono inline-flex min-h-11 shrink-0 items-center rounded-[var(--radius-control)] border border-line-strong bg-surface px-3 ops-meta text-accent transition-colors hover:border-accent hover:bg-accent-soft"
         >
-          rec {operand.source.recordNumber}
+          {operand.source.fileName} · row {operand.source.recordNumber}
         </button>
-      ) : (
-        <span className="w-[52px] shrink-0" />
-      )}
+      ) : null}
     </div>
   );
 }
@@ -474,11 +471,11 @@ function SourceCard({
   const shown = value === undefined ? null : operandDisplay(value, unit);
 
   return (
-    <div className="rounded-md border border-line bg-surface px-3 py-2">
+    <div className="ops-inset bg-surface px-4 py-3">
       <div className="flex items-baseline justify-between gap-3">
-        <span className="text-[12.5px] text-ink-soft">{label}</span>
+        <span className="ops-body text-ink-soft">{label}</span>
         {shown ? (
-          <span className="mono text-[13px] font-semibold text-ink">
+          <span className="mono ops-body font-semibold text-ink">
             {shown.text}
             {shown.clock ? (
               <span className="ml-1.5 font-normal text-ink-muted">({shown.clock})</span>
@@ -487,19 +484,19 @@ function SourceCard({
         ) : null}
       </div>
       <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
-        <span className="mono text-[11.5px] text-ink-muted">
+        <span className="mono ops-meta text-ink-muted">
           {source.fileName} · record {source.recordNumber} · {source.column}
         </span>
         <button
           type="button"
           onClick={() => onOpenSource(source)}
-          className="inline-flex items-center gap-1.5 rounded border border-line-strong bg-surface px-2 py-1 text-[11.5px] font-medium text-accent transition-colors hover:border-accent hover:bg-accent-soft"
+          className="ops-control ops-meta shrink-0 text-accent"
         >
           <SourceGlyph />
           Open source cell
         </button>
       </div>
-      <p className="mt-1 text-[11.5px] text-ink-muted">
+      <p className="mt-1 ops-meta text-ink-muted">
         Raw value:{' '}
         <span className="mono text-ink-soft">
           {raw === null ? '[column absent]' : raw === '' ? '[empty]' : raw}

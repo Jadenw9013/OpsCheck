@@ -1,0 +1,354 @@
+{
+  "scope": "Approved opaque sRGB token pairs only; NOT an audit of the rendered OpsCheck UI.",
+  "rounding": "Displayed ratios rounded to 2 decimals; pass/fail uses the unrounded ratio.",
+  "decorativeDivider": {
+    "color": "#DCE3EC",
+    "contrastOnWhite": 1.2929451303821426,
+    "excludedFromRequiredPairs": true,
+    "reason": "Decorative separation only. Never use as the sole necessary control boundary."
+  },
+  "passed": 34,
+  "total": 34,
+  "checks": [
+    {
+      "role": "Primary prose",
+      "foregroundToken": "--ops-ink",
+      "backgroundToken": "--ops-surface",
+      "foreground": "#0F172A",
+      "background": "#FFFFFF",
+      "ratio": 17.85253496299567,
+      "threshold": 7,
+      "passed": true
+    },
+    {
+      "role": "Supporting text",
+      "foregroundToken": "--ops-ink-secondary",
+      "backgroundToken": "--ops-surface",
+      "foreground": "#475569",
+      "background": "#FFFFFF",
+      "ratio": 7.577663953533317,
+      "threshold": 4.5,
+      "passed": true
+    },
+    {
+      "role": "Metadata",
+      "foregroundToken": "--ops-ink-muted",
+      "backgroundToken": "--ops-surface",
+      "foreground": "#526277",
+      "background": "#FFFFFF",
+      "ratio": 6.2273470215745945,
+      "threshold": 4.5,
+      "passed": true
+    },
+    {
+      "role": "Necessary control border",
+      "foregroundToken": "--ops-border-control",
+      "backgroundToken": "--ops-surface",
+      "foreground": "#738398",
+      "background": "#FFFFFF",
+      "ratio": 3.8681961048297664,
+      "threshold": 3,
+      "passed": true
+    },
+    {
+      "role": "Focus ring outside light control",
+      "foregroundToken": "--ops-focus",
+      "backgroundToken": "--ops-surface",
+      "foreground": "#1D4ED8",
+      "background": "#FFFFFF",
+      "ratio": 6.701618401398807,
+      "threshold": 3,
+      "passed": true
+    },
+    {
+      "role": "Primary prose",
+      "foregroundToken": "--ops-ink",
+      "backgroundToken": "--ops-canvas",
+      "foreground": "#0F172A",
+      "background": "#F6F8FB",
+      "ratio": 16.78013629471514,
+      "threshold": 7,
+      "passed": true
+    },
+    {
+      "role": "Supporting text",
+      "foregroundToken": "--ops-ink-secondary",
+      "backgroundToken": "--ops-canvas",
+      "foreground": "#475569",
+      "background": "#F6F8FB",
+      "ratio": 7.122474998615123,
+      "threshold": 4.5,
+      "passed": true
+    },
+    {
+      "role": "Metadata",
+      "foregroundToken": "--ops-ink-muted",
+      "backgroundToken": "--ops-canvas",
+      "foreground": "#526277",
+      "background": "#F6F8FB",
+      "ratio": 5.853271369758214,
+      "threshold": 4.5,
+      "passed": true
+    },
+    {
+      "role": "Necessary control border",
+      "foregroundToken": "--ops-border-control",
+      "backgroundToken": "--ops-canvas",
+      "foreground": "#738398",
+      "background": "#F6F8FB",
+      "ratio": 3.6358342380099686,
+      "threshold": 3,
+      "passed": true
+    },
+    {
+      "role": "Focus ring outside light control",
+      "foregroundToken": "--ops-focus",
+      "backgroundToken": "--ops-canvas",
+      "foreground": "#1D4ED8",
+      "background": "#F6F8FB",
+      "ratio": 6.299053350335693,
+      "threshold": 3,
+      "passed": true
+    },
+    {
+      "role": "Primary prose",
+      "foregroundToken": "--ops-ink",
+      "backgroundToken": "--ops-surface-subtle",
+      "foreground": "#0F172A",
+      "background": "#F1F5F9",
+      "ratio": 16.295987899750777,
+      "threshold": 7,
+      "passed": true
+    },
+    {
+      "role": "Supporting text",
+      "foregroundToken": "--ops-ink-secondary",
+      "backgroundToken": "--ops-surface-subtle",
+      "foreground": "#475569",
+      "background": "#F1F5F9",
+      "ratio": 6.916973995632248,
+      "threshold": 4.5,
+      "passed": true
+    },
+    {
+      "role": "Metadata",
+      "foregroundToken": "--ops-ink-muted",
+      "backgroundToken": "--ops-surface-subtle",
+      "foreground": "#526277",
+      "background": "#F1F5F9",
+      "ratio": 5.684390027605361,
+      "threshold": 4.5,
+      "passed": true
+    },
+    {
+      "role": "Necessary control border",
+      "foregroundToken": "--ops-border-control",
+      "backgroundToken": "--ops-surface-subtle",
+      "foreground": "#738398",
+      "background": "#F1F5F9",
+      "ratio": 3.5309314362822266,
+      "threshold": 3,
+      "passed": true
+    },
+    {
+      "role": "Focus ring outside light control",
+      "foregroundToken": "--ops-focus",
+      "backgroundToken": "--ops-surface-subtle",
+      "foreground": "#1D4ED8",
+      "background": "#F1F5F9",
+      "ratio": 6.117310096538619,
+      "threshold": 3,
+      "passed": true
+    },
+    {
+      "role": "Button text",
+      "foregroundToken": "--ops-on-accent",
+      "backgroundToken": "--ops-accent",
+      "foreground": "#FFFFFF",
+      "background": "#0E7490",
+      "ratio": 5.3577549124490425,
+      "threshold": 4.5,
+      "passed": true
+    },
+    {
+      "role": "Button hover text",
+      "foregroundToken": "--ops-on-accent",
+      "backgroundToken": "--ops-accent-hover",
+      "foreground": "#FFFFFF",
+      "background": "#155E75",
+      "ratio": 7.266842816941486,
+      "threshold": 4.5,
+      "passed": true
+    },
+    {
+      "role": "Link / picking edge",
+      "foregroundToken": "--ops-accent",
+      "backgroundToken": "--ops-surface",
+      "foreground": "#0E7490",
+      "background": "#FFFFFF",
+      "ratio": 5.3577549124490425,
+      "threshold": 4.5,
+      "passed": true
+    },
+    {
+      "role": "Selected text / packing edge",
+      "foregroundToken": "--ops-accent",
+      "backgroundToken": "--ops-accent-surface",
+      "foreground": "#0E7490",
+      "background": "#EAF6F8",
+      "ratio": 4.856742089278301,
+      "threshold": 4.5,
+      "passed": true
+    },
+    {
+      "role": "Selected control border",
+      "foregroundToken": "--ops-border-control",
+      "backgroundToken": "--ops-accent-surface",
+      "foreground": "#738398",
+      "background": "#EAF6F8",
+      "ratio": 3.506474472779047,
+      "threshold": 3,
+      "passed": true
+    },
+    {
+      "role": "Selection focus",
+      "foregroundToken": "--ops-focus",
+      "backgroundToken": "--ops-accent-surface",
+      "foreground": "#1D4ED8",
+      "background": "#EAF6F8",
+      "ratio": 6.074938605483498,
+      "threshold": 3,
+      "passed": true
+    },
+    {
+      "role": "Success label / icon",
+      "foregroundToken": "--ops-success",
+      "backgroundToken": "--ops-success-surface",
+      "foreground": "#166534",
+      "background": "#F0FDF4",
+      "ratio": 6.811651629293788,
+      "threshold": 4.5,
+      "passed": true
+    },
+    {
+      "role": "Warning label / icon",
+      "foregroundToken": "--ops-warning",
+      "backgroundToken": "--ops-warning-surface",
+      "foreground": "#92400E",
+      "background": "#FFFBEB",
+      "ratio": 6.837002380367332,
+      "threshold": 4.5,
+      "passed": true
+    },
+    {
+      "role": "Violation label / overrun",
+      "foregroundToken": "--ops-danger",
+      "backgroundToken": "--ops-danger-surface",
+      "foreground": "#B42318",
+      "background": "#FEF3F2",
+      "ratio": 6.04726982551666,
+      "threshold": 4.5,
+      "passed": true
+    },
+    {
+      "role": "Information label",
+      "foregroundToken": "--ops-info",
+      "backgroundToken": "--ops-info-surface",
+      "foreground": "#1D4ED8",
+      "background": "#EFF6FF",
+      "ratio": 6.157973971775643,
+      "threshold": 4.5,
+      "passed": true
+    },
+    {
+      "role": "Success on white",
+      "foregroundToken": "--ops-success",
+      "backgroundToken": "--ops-surface",
+      "foreground": "#166534",
+      "background": "#FFFFFF",
+      "ratio": 7.130310076434003,
+      "threshold": 4.5,
+      "passed": true
+    },
+    {
+      "role": "Warning on white",
+      "foregroundToken": "--ops-warning",
+      "backgroundToken": "--ops-surface",
+      "foreground": "#92400E",
+      "background": "#FFFFFF",
+      "ratio": 7.090048300172369,
+      "threshold": 4.5,
+      "passed": true
+    },
+    {
+      "role": "Violation on white",
+      "foregroundToken": "--ops-danger",
+      "backgroundToken": "--ops-surface",
+      "foreground": "#B42318",
+      "background": "#FFFFFF",
+      "ratio": 6.57428861557707,
+      "threshold": 4.5,
+      "passed": true
+    },
+    {
+      "role": "White text on readiness badge",
+      "foregroundToken": "--ops-on-accent",
+      "backgroundToken": "--ops-success",
+      "foreground": "#FFFFFF",
+      "background": "#166534",
+      "ratio": 7.130310076434003,
+      "threshold": 4.5,
+      "passed": true
+    },
+    {
+      "role": "White text on violation badge",
+      "foregroundToken": "--ops-on-accent",
+      "backgroundToken": "--ops-danger",
+      "foreground": "#FFFFFF",
+      "background": "#B42318",
+      "ratio": 6.57428861557707,
+      "threshold": 4.5,
+      "passed": true
+    },
+    {
+      "role": "Neutral picking bar label",
+      "foregroundToken": "--ops-on-accent",
+      "backgroundToken": "--ops-ink-secondary",
+      "foreground": "#FFFFFF",
+      "background": "#475569",
+      "ratio": 7.577663953533317,
+      "threshold": 4.5,
+      "passed": true
+    },
+    {
+      "role": "Meaningful marker on track",
+      "foregroundToken": "--ops-ink",
+      "backgroundToken": "--ops-surface-subtle",
+      "foreground": "#0F172A",
+      "background": "#F1F5F9",
+      "ratio": 16.295987899750777,
+      "threshold": 3,
+      "passed": true
+    },
+    {
+      "role": "Picking against track",
+      "foregroundToken": "--ops-accent",
+      "backgroundToken": "--ops-surface-subtle",
+      "foreground": "#0E7490",
+      "background": "#F1F5F9",
+      "ratio": 4.890616901413378,
+      "threshold": 3,
+      "passed": true
+    },
+    {
+      "role": "Overrun against selected track",
+      "foregroundToken": "--ops-danger",
+      "backgroundToken": "--ops-accent-surface",
+      "foreground": "#B42318",
+      "background": "#EAF6F8",
+      "ratio": 5.959515645657114,
+      "threshold": 3,
+      "passed": true
+    }
+  ]
+}

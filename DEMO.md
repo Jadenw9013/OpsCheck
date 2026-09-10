@@ -59,8 +59,10 @@ times in neutral grey, and every derived column reads "Not evaluated".
 Closing line: *"A passing report means the five implemented checks passed on this synthetic data —
 not that the plan is optimal or feasible in a real warehouse."*
 
-Reference screenshots: `web/artifacts/31-s01-aligned-1440.png` and
-`web/artifacts/32-s01-laptop-1366.png` (step 3), and `web/artifacts/14-blocked-1440.png` (step 5).
+Reference screenshots (current design): `web/artifacts/after/1440-s01-violation.png` (step 3),
+`web/artifacts/after/1440-s02-blocked.png` (step 5), and
+`web/artifacts/after/1440-s01-ai-report-MOCKED.png` for the AI tab. Earlier screenshots are kept in
+`web/artifacts/` and `web/artifacts/before/` as history.
 
 ## Optional AI briefing
 

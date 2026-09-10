@@ -1,0 +1,190 @@
+/* OpsCheck presentation reference — integrate into the existing style system.
+   Do not paste contradictory duplicates over Tailwind utility rules.
+   Token colors are audited by check-contrast.mjs; rendered usage still needs audit.
+   Size equivalents assume a 16px root. Keep the root at 100%, not 62.5%.
+*/
+:root {
+  --ops-canvas: #F6F8FB;
+  --ops-surface: #FFFFFF;
+  --ops-surface-subtle: #F1F5F9;
+  --ops-ink: #0F172A;
+  --ops-ink-secondary: #475569;
+  --ops-ink-muted: #526277;
+  --ops-accent: #0E7490;
+  --ops-accent-hover: #155E75;
+  --ops-accent-surface: #EAF6F8;
+  --ops-on-accent: #FFFFFF;
+  --ops-success: #166534;
+  --ops-success-surface: #F0FDF4;
+  --ops-warning: #92400E;
+  --ops-warning-surface: #FFFBEB;
+  --ops-danger: #B42318;
+  --ops-danger-surface: #FEF3F2;
+  --ops-info: #1D4ED8;
+  --ops-info-surface: #EFF6FF;
+  --ops-focus: #1D4ED8;
+  --ops-border-control: #738398;
+  --ops-border-decorative: #DCE3EC;
+
+  --ops-font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ops-font-mono: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  --ops-type-meta: .875rem;
+  --ops-type-body: 1rem;
+  --ops-type-prose: 1.125rem;
+  --ops-type-panel: 1.25rem;
+  --ops-type-outcome: 1.5rem;
+  --ops-type-title: 2rem;
+  --ops-leading-meta: 1.428571;
+  --ops-leading-body: 1.5;
+  --ops-leading-prose: 1.555556;
+  --ops-leading-panel: 1.4;
+  --ops-leading-outcome: 1.333333;
+  --ops-leading-title: 1.25;
+
+  --ops-space-1: .25rem;
+  --ops-space-2: .5rem;
+  --ops-space-3: .75rem;
+  --ops-space-4: 1rem;
+  --ops-space-6: 1.5rem;
+  --ops-space-8: 2rem;
+  --ops-space-12: 3rem;
+  --ops-space-16: 4rem;
+  --ops-radius-control: .5rem;
+  --ops-radius-panel: .75rem;
+  --ops-shadow-panel: 0 1px 2px rgb(15 23 42 / .05);
+  --ops-target: 2.75rem;
+  --ops-primary-height: 3rem;
+  --ops-order-row: 3.5rem;
+  --ops-icon-size: 1.25rem;
+  --ops-page-max: 90rem;
+  --ops-prose-max: 65ch;
+  --ops-motion-fast: 120ms;
+  --ops-motion-standard: 160ms;
+}
+
+/* These helpers are opt-in, not a complete UI or automatic migration. */
+.ops-app {
+  min-block-size: 100svh;
+  color: var(--ops-ink);
+  background: var(--ops-canvas);
+  font-family: var(--ops-font-sans);
+  font-size: var(--ops-type-body);
+  line-height: var(--ops-leading-body);
+}
+.ops-app *, .ops-app *::before, .ops-app *::after { box-sizing: border-box; }
+.ops-app :where(button, input, select, textarea) { font: inherit; }
+.ops-app :where(h1, h2, h3, p) { margin: 0; }
+.ops-shell {
+  inline-size: min(calc(100% - 4rem), var(--ops-page-max));
+  margin-inline: auto;
+  padding-block: var(--ops-space-6) var(--ops-space-8);
+}
+.ops-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(27rem, 1fr);
+  gap: var(--ops-space-6);
+  align-items: start;
+}
+.ops-workspace > * { min-inline-size: 0; }
+.ops-panel {
+  min-inline-size: 0;
+  padding: var(--ops-space-6);
+  background: var(--ops-surface);
+  border: 1px solid var(--ops-border-decorative);
+  border-radius: var(--ops-radius-panel);
+  box-shadow: var(--ops-shadow-panel);
+}
+.ops-title {
+  font-size: var(--ops-type-title);
+  line-height: var(--ops-leading-title);
+  font-weight: 600;
+}
+.ops-outcome {
+  font-size: var(--ops-type-outcome);
+  line-height: var(--ops-leading-outcome);
+  font-weight: 600;
+}
+.ops-panel-title {
+  font-size: var(--ops-type-panel);
+  line-height: var(--ops-leading-panel);
+  font-weight: 600;
+}
+.ops-prose {
+  max-inline-size: var(--ops-prose-max);
+  font-size: var(--ops-type-prose);
+  line-height: var(--ops-leading-prose);
+  color: var(--ops-ink);
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+.ops-prose p + p { margin-block-start: var(--ops-space-4); }
+.ops-meta {
+  font-size: var(--ops-type-meta);
+  line-height: var(--ops-leading-meta);
+  color: var(--ops-ink-muted);
+}
+.ops-numeric { font-variant-numeric: tabular-nums; }
+.ops-code { font-family: var(--ops-font-mono); font-variant-numeric: tabular-nums; }
+.ops-control {
+  min-block-size: var(--ops-target);
+  min-inline-size: var(--ops-target);
+  padding: var(--ops-space-2) var(--ops-space-4);
+  border: 1px solid var(--ops-border-control);
+  border-radius: var(--ops-radius-control);
+  background: var(--ops-surface);
+  color: var(--ops-ink);
+  font-size: var(--ops-type-body);
+  line-height: var(--ops-leading-body);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--ops-motion-fast), color var(--ops-motion-fast);
+}
+.ops-control--primary {
+  min-block-size: var(--ops-primary-height);
+  background: var(--ops-accent);
+  border-color: var(--ops-accent);
+  color: var(--ops-on-accent);
+  font-weight: 600;
+}
+.ops-control--primary:hover:not(:disabled) {
+  background: var(--ops-accent-hover);
+  border-color: var(--ops-accent-hover);
+}
+.ops-control:disabled {
+  cursor: not-allowed;
+  background: var(--ops-surface-subtle);
+  color: var(--ops-ink-muted);
+  border-color: var(--ops-border-control);
+}
+.ops-app :where(button, a, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--ops-focus);
+  outline-offset: 3px;
+}
+.ops-inline-link {
+  color: var(--ops-accent);
+  text-decoration: underline;
+  text-underline-offset: .15em;
+}
+.ops-scroll-region { max-inline-size: 100%; overflow-x: auto; }
+/* Apply the min-width to the WHOLE timeline (axis + rows), not only its axis. */
+.ops-timeline-inner { min-inline-size: 36rem; }
+.ops-order-row { min-block-size: var(--ops-order-row); }
+
+@media (max-width: 74.999rem) {
+  .ops-workspace { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 47.999rem) {
+  .ops-shell {
+    inline-size: calc(100% - 2rem);
+    padding-block: var(--ops-space-4) var(--ops-space-8);
+  }
+  .ops-panel { padding: var(--ops-space-4); }
+  /* Keep body/prose sizes; reflow rather than shrinking text. */
+}
+@media (prefers-reduced-motion: reduce) {
+  .ops-app *, .ops-app *::before, .ops-app *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

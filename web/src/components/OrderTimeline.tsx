@@ -45,9 +45,9 @@ function edgeTransform(percent: number): string {
  * border, label column, gap, plotting area, and status column. Changing this
  * in one place changes both, so the axis cannot drift away from the tracks.
  */
-const ROW_SHELL = 'flex w-full items-center gap-2 border-l-[3px] py-1 pr-1';
-const LABEL_WIDTH = 'w-[76px] shrink-0 sm:w-[104px]';
-const STATUS_WIDTH = 'w-[74px] shrink-0 sm:w-[96px]';
+const ROW_SHELL = 'flex w-full items-center gap-3 border-l-4 py-2 pr-2';
+const LABEL_WIDTH = 'w-[104px] shrink-0';
+const STATUS_WIDTH = 'w-[132px] shrink-0';
 
 /** Below this share of the axis, the bar cannot hold its label legibly. */
 const MIN_LABEL_PERCENT = 8;
@@ -72,19 +72,26 @@ export function OrderTimeline({
   return (
     <Panel title="Order schedule" subtitle={subtitle}>
       {model.blocked ? (
-        <p className="border-b border-line bg-warn-soft/50 px-3.5 py-2 text-[12px] text-warn">
+        <p className="ops-body border-y border-warn/30 bg-warn-soft px-6 py-4 text-warn">
           <strong className="font-semibold">Not evaluated.</strong> Required input data is missing,
           so no modeled packing, readiness, or deadline result is drawn for any order. The submitted
           picking times below are shown exactly as supplied.
         </p>
       ) : null}
 
-      <div className="px-3.5 py-2.5">
+      <div className="px-6 pb-6">
         <Legend evaluated={model.evaluated} />
+        <div
+          className="ops-scroll-region"
+          tabIndex={0}
+          role="group"
+          aria-label="Order schedule timeline"
+        >
+          <div className="ops-timeline-inner">
         <AxisHeader axis={model.axis} />
 
         {model.rows.length === 0 ? (
-          <p className="py-6 text-center text-[12.5px] text-ink-muted">
+          <p className="py-6 text-center ops-body text-ink-muted">
             No submitted assignments could be read, so there is nothing to plot.
           </p>
         ) : (
@@ -100,8 +107,10 @@ export function OrderTimeline({
             ))}
           </ul>
         )}
+          </div>
+        </div>
 
-        <p className="mt-2.5 border-t border-line pt-2 text-[11px] text-ink-muted">
+        <p className="mt-4 border-t border-line pt-4 ops-body text-ink-soft">
           Packing is a modeled fixed delay beginning the moment picking ends.{' '}
           <strong className="font-semibold text-ink-soft">
             Packing capacity is not modeled
@@ -146,13 +155,13 @@ function AxisHeader({ axis }: { axis: TimelineAxis }) {
   return (
     <div className={ROW_SHELL + ' border-l-transparent'}>
       <div className={LABEL_WIDTH + ' pl-1.5'} />
-      <div data-plot="axis" className="relative h-4 flex-1">
+      <div data-plot="axis" className="relative h-5 flex-1">
         {axis.ticks.map((tick) => {
           const percent = axisPercent(axis, tick);
           return (
-            <TimeAnchor key={tick} percent={percent} minute={tick} className="axis-tick top-0 h-4">
+            <TimeAnchor key={tick} percent={percent} minute={tick} className="axis-tick top-0 h-5">
               <span
-                className="mono absolute left-0 top-0 whitespace-nowrap text-[10px] tabular-nums text-ink-muted"
+                className="mono absolute left-0 top-0 whitespace-nowrap ops-meta tabular-nums text-ink-muted"
                 style={{ transform: edgeTransform(percent) }}
               >
                 {clockOf(tick)}
@@ -216,14 +225,14 @@ function Row({
           : {})}
         className={
           ROW_SHELL +
-          ' rounded text-left transition-colors ' +
+          ' ops-order-row rounded-md text-left transition-colors ' +
           (selected
-            ? 'border-l-accent bg-accent-soft/60'
+            ? 'border-l-accent bg-accent-soft'
             : 'border-l-transparent ' + (selectable ? 'hover:bg-sunken' : ''))
         }
       >
-        <span className={LABEL_WIDTH + ' pl-1.5'}>
-          <span className="mono flex items-center gap-1 text-[12px] font-semibold text-ink">
+        <span className={LABEL_WIDTH + ' pl-2'}>
+          <span className="mono flex items-center gap-1.5 ops-body font-semibold text-ink">
             {late ? (
               <span className="text-bad">
                 <AlertGlyph className="h-3 w-3" />
@@ -231,16 +240,16 @@ function Row({
             ) : null}
             {row.orderId}
           </span>
-          <span className="mono block text-[10.5px] text-ink-muted">{row.workerId}</span>
+          <span className="mono block ops-meta text-ink-muted">{row.workerId}</span>
         </span>
 
-        <span data-plot="row" className="relative h-8 flex-1 overflow-hidden rounded-sm bg-sunken">
+        <span data-plot="row" className="relative h-10 flex-1 overflow-hidden rounded-md bg-sunken">
           <Gridlines axis={axis} />
 
           {row.pick ? (
             <span
               className={
-                'absolute top-1.5 flex h-5 items-center justify-center overflow-hidden rounded-[3px] text-[10px] font-semibold ' +
+                'absolute top-2 flex h-6 items-center justify-center overflow-hidden rounded-[3px] ops-meta font-semibold ' +
                 (row.status === 'NOT_EVALUATED' ? 'bg-idle text-white' : 'bg-accent text-white')
               }
               style={{
@@ -259,14 +268,14 @@ function Row({
               {showPickLabel ? <span className="hidden px-1 sm:inline">pick</span> : null}
             </span>
           ) : (
-            <span className="absolute inset-y-0 left-0 flex items-center pl-1 text-[10.5px] text-ink-muted">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-1 ops-meta text-ink-muted">
               {row.note ?? 'Not plottable'}
             </span>
           )}
 
           {row.pack ? (
             <span
-              className="pack-band absolute top-1.5 h-5 rounded-[3px]"
+              className="pack-band absolute top-2 h-6 rounded-[3px]"
               style={{
                 left: axisPercent(axis, row.pack.startMinute) + '%',
                 width: segmentPercent(axis, row.pack) + '%',
@@ -313,7 +322,7 @@ function Row({
             >
               <span
                 className={
-                  'mono absolute left-0 top-0 block whitespace-nowrap rounded-full px-1 text-[9.5px] font-semibold ' +
+                  'mono absolute left-0 top-0 block whitespace-nowrap rounded-full px-1 ops-meta font-semibold ' +
                   (late ? 'bg-bad text-white' : 'bg-ok text-white')
                 }
                 style={{ transform: edgeTransform(axisPercent(axis, row.readyMinute)) }}
@@ -326,22 +335,22 @@ function Row({
 
         <span className={STATUS_WIDTH + ' text-right'}>
           {row.status === 'FAIL' && row.lateMinutes !== null ? (
-            <span className="mono text-[11px] font-semibold text-bad">
+            <span className="mono ops-body font-semibold text-bad">
               +{row.lateMinutes} min late
             </span>
           ) : row.status === 'PASS' ? (
-            <span className="inline-flex items-center justify-end gap-1 text-[11px] text-ok">
-              <CheckGlyph className="h-3 w-3" />
+            <span className="inline-flex items-center justify-end gap-2 ops-body text-ok">
+              <CheckGlyph className="h-5 w-5" />
               on time
             </span>
           ) : row.status === 'BLOCKED' ? (
-            <span className="inline-flex items-center justify-end gap-1 text-[11px] text-warn">
-              <BlockGlyph className="h-3 w-3" />
+            <span className="inline-flex items-center justify-end gap-2 ops-body text-warn">
+              <BlockGlyph className="h-5 w-5" />
               blocked
             </span>
           ) : (
-            <span className="inline-flex items-center justify-end gap-1 text-[10.5px] text-ink-muted">
-              <IdleGlyph className="h-3 w-3" />
+            <span className="inline-flex items-center justify-end gap-2 ops-meta text-ink-muted">
+              <IdleGlyph className="h-5 w-5" />
               not evaluated
             </span>
           )}
@@ -381,24 +390,24 @@ function Legend({ evaluated }: { evaluated: boolean }) {
   return (
     <ul
       aria-label="Schedule legend"
-      className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10.5px] text-ink-muted"
+      className="mb-4 flex flex-wrap items-center gap-x-5 gap-y-2 ops-meta text-ink-soft"
     >
-      <li className="flex items-center gap-1.5">
-        <span className={'h-2.5 w-4 rounded-[2px] ' + (evaluated ? 'bg-accent' : 'bg-idle')} />
+      <li className="flex items-center gap-2">
+        <span className={'h-3 w-5 rounded-[2px] ' + (evaluated ? 'bg-accent' : 'bg-idle')} />
         Submitted picking
       </li>
       {evaluated ? (
         <>
-          <li className="flex items-center gap-1.5">
-            <span className="pack-band h-2.5 w-4 rounded-[2px]" />
+          <li className="flex items-center gap-2">
+            <span className="pack-band h-3 w-5 rounded-[2px]" />
             Modeled packing
           </li>
-          <li className="flex items-center gap-1.5">
-            <span className="h-3 w-[3px] rounded-full bg-ink" />
+          <li className="flex items-center gap-2">
+            <span className="h-4 w-[3px] rounded-full bg-ink" />
             Departure
           </li>
-          <li className="flex items-center gap-1.5">
-            <span className="overrun-band h-1.5 w-4 rounded-full" />
+          <li className="flex items-center gap-2">
+            <span className="overrun-band h-2 w-5 rounded-full" />
             Deadline miss
           </li>
         </>

@@ -78,6 +78,25 @@ Run checks will bill.
 narrative reference checks. See VERIFICATION.md, including a disclosure of unintended calls made
 before the test-server fix.
 
+## Presentation redesign, 2026-09-10
+A bounded design retrofit using `opscheck-design-system/`. Tokens are integrated into the existing
+Tailwind theme in `web/src/app/globals.css`; components use semantic role classes (`ops-title`,
+`ops-outcome`, `ops-panel-title`, `ops-prose`, `ops-body`, `ops-meta`) instead of the 126 arbitrary
+`text-[Npx]` utilities that produced a 10-13px interface.
+
+Measured result: h1 18px -> 32px, panel headings 13 -> 20, body/table 12.5 -> 16, AI prose 12.5 ->
+18, metadata 10-11.5 -> 14. Run checks 31px -> 48px high; schedule rows 41 -> 60. Nothing visible
+is below 14px.
+
+Layout: header -> toolbar -> "Current plan result" -> schedule/inspector workspace -> secondary
+disclosures. Plan status moved into its own result region in plain language.
+
+**Do not reintroduce** the `.axis-tick:nth-child(even) { display: none }` rule: it hid the tick
+anchor, not its label, and broke geometry measurement. If label thinning is needed, hide the inner
+label only.
+
+No engine, fixture, AI protocol or provider behaviour changed, and no live call was made.
+
 ## What actually works
 - One screen preloading the S00 baseline. Inputs and the submitted plan are visible immediately,
   and every derived column reads "Not evaluated" until the user runs checks.
@@ -132,9 +151,10 @@ See `VERIFICATION.md` for the full record. Summary: typecheck, lint, 128 Vitest 
 all 18 frozen fixtures), production build with no API key, and 31 Playwright Chromium checks all
 PASSED; seed copies are byte-identical to `seed-data/`.
 
-**Not verified:** keyboard-only traversal end to end, and any assistive-technology pass. The
-briefing browser checks remain mocked-provider checks by design; the live path is covered by the
-three recorded smoke calls instead.
+**Not verified:** keyboard-only traversal end to end, any assistive-technology pass, an automated
+axe scan, 200% text enlargement, and the user text-spacing override test. The briefing browser
+checks remain mocked-provider checks by design; the live path is covered by the recorded smoke
+calls instead.
 
 ## Deliberately deferred, still required for M0–M4
 Real local CSV replacement/upload UI and the mapping-profile switcher; the regression-results

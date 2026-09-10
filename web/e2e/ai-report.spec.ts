@@ -211,9 +211,7 @@ test('deterministic results update before the AI response arrives', async ({ pag
   // Engine output is present immediately, while the report is still generating.
   await expect(schedule(page).getByText('+10 min late')).toBeVisible({ timeout: 1000 });
   await expect(
-    page.getByRole('region', { name: 'Scenario and checks' }).getByText(
-      'Submitted plan has modeled violations',
-    ),
+    page.getByRole('region', { name: 'Current plan result' }).getByText('1 modeled violation'),
   ).toBeVisible();
   await expect(panel(page)).toContainText('Requesting Claude');
 

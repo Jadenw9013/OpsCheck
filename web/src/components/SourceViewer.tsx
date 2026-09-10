@@ -59,8 +59,8 @@ export function SourceViewer({
     >
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line px-3.5 py-2.5">
         <div className="flex items-center gap-2">
-          <h2 className="text-[13px] font-semibold text-ink">Raw source records</h2>
-          <span className="text-[11.5px] text-ink-muted">
+          <h2 className="ops-body font-semibold text-ink">Raw source records</h2>
+          <span className="ops-meta text-ink-muted">
             Record numbers are logical CSV records, not physical line numbers. The header is
             record&nbsp;1.
           </span>
@@ -81,14 +81,14 @@ export function SourceViewer({
                 aria-controls={'source-panel-' + kind}
                 onClick={() => onSelectTable(kind)}
                 className={
-                  'rounded px-2.5 py-1 text-[12px] font-medium transition-colors ' +
+                  'rounded px-2.5 py-1 ops-body font-medium transition-colors ' +
                   (selected
                     ? 'bg-surface text-ink shadow-[0_1px_2px_rgba(16,24,40,0.10)]'
                     : 'text-ink-muted hover:text-ink')
                 }
               >
                 {TABLE_LABEL[kind]}
-                <span className="ml-1.5 mono text-[11px] text-ink-muted">
+                <span className="ml-1.5 mono ops-meta text-ink-muted">
                   {preview[kind].recordCount}
                 </span>
               </button>
@@ -103,7 +103,7 @@ export function SourceViewer({
         aria-label={TABLE_LABEL[activeTable] + ' source records'}
         className="min-h-0"
       >
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-line bg-sunken px-3.5 py-1.5 text-[11.5px] text-ink-muted">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-line bg-sunken px-3.5 py-1.5 ops-meta text-ink-muted">
           <span className="mono text-ink-soft">{table.fileName ?? 'no file loaded'}</span>
           <span>
             profile <span className="mono">{table.profile ?? '—'}</span>
@@ -125,17 +125,17 @@ export function SourceViewer({
         </div>
 
         {headers.length === 0 ? (
-          <p className="px-3.5 py-6 text-[12.5px] text-ink-muted">
+          <p className="px-3.5 py-6 ops-body text-ink-muted">
             This file could not be read as CSV, so no records are available to inspect.
           </p>
         ) : (
           <div className="scroll-panel max-h-[220px]">
-            <table className="w-full border-collapse text-[12.5px]">
+            <table className="w-full border-collapse ops-body">
               <thead className="sticky top-0 z-10 bg-sunken">
                 <tr className={headerRowIsTarget ? 'cell-hit' : undefined}>
                   <th
                     scope="col"
-                    className="w-14 border-b border-line px-2.5 py-1.5 text-left text-[11px] font-semibold uppercase tracking-wide text-ink-muted"
+                    className="w-14 border-b border-line px-2.5 py-1.5 text-left ops-meta font-semibold uppercase tracking-wide text-ink-muted"
                   >
                     Rec
                   </th>

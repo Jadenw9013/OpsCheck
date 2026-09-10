@@ -60,7 +60,7 @@ export function AiReportPanel({
         <p
           role="status"
           className={
-            'rounded-md border px-3 py-2 text-[12px] ' +
+            'rounded-md border px-3 py-2 ops-body ' +
             (state === 'withheld'
               ? 'border-warn/30 bg-warn-soft text-warn'
               : 'border-line bg-sunken text-ink-soft')
@@ -74,10 +74,10 @@ export function AiReportPanel({
         <button
           type="button"
           onClick={controller.retry}
-          className="self-start rounded-md border border-line-strong bg-surface px-3 py-1.5 text-[12px] font-medium text-ink-soft transition-colors hover:border-accent hover:text-accent"
+          className="self-start rounded-md border border-line-strong bg-surface px-3 py-1.5 ops-body font-medium text-ink-soft transition-colors hover:border-accent hover:text-accent"
         >
           Retry AI report
-          <span className="ml-1.5 text-[11px] font-normal text-ink-muted">
+          <span className="ml-1.5 ops-meta font-normal text-ink-muted">
             starts one new request
           </span>
         </button>
@@ -108,7 +108,7 @@ function Header({ controller }: { controller: BriefingController }) {
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <h3 className="text-[14px] font-semibold text-ink">OpsCheck AI report</h3>
         {response?.provider ? (
-          <span className="mono text-[10.5px] text-ink-muted">
+          <span className="mono ops-meta text-ink-muted">
             {response.provider.model ?? config?.model ?? 'model'} ·{' '}
             {response.provider.stopReason ?? 'unknown'}
             {response.provider.elapsedMs !== null
@@ -144,7 +144,7 @@ export function PlanStrip({
       : 'border-ok/30 bg-ok-soft text-ok';
 
   return (
-    <p className={'mt-1.5 rounded-md border px-3 py-1.5 text-[12px] font-medium ' + tone}>
+    <p className={'mt-1.5 rounded-md border px-3 py-1.5 ops-body font-medium ' + tone}>
       {verdict.headline}
     </p>
   );
@@ -156,7 +156,7 @@ function Activity({ state, scenarioId }: { state: string; scenarioId: string | n
 
   return (
     <div className="rounded-md border border-line bg-sunken px-3 py-2">
-      <p className="text-[11px] text-ink-muted">
+      <p className="ops-meta text-ink-muted">
         Run event · scenario <span className="mono">{scenarioId ?? '—'}</span> · checks complete,
         generating report
       </p>
@@ -168,7 +168,7 @@ function Activity({ state, scenarioId }: { state: string; scenarioId: string | n
             <li
               key={stage.state}
               className={
-                'flex items-center gap-1.5 text-[11.5px] ' +
+                'flex items-center gap-1.5 ops-meta ' +
                 (active ? 'text-ink' : done ? 'text-ink-muted' : 'text-ink-muted/60')
               }
             >
@@ -199,23 +199,23 @@ function Assistant({
   );
 
   return (
-    <section aria-label="AI explanation" className="rounded-lg border border-accent/25 bg-accent-soft/25">
-      <div className="flex items-center gap-2 border-b border-accent/20 px-3 py-1.5">
+    <section aria-label="AI explanation" className="rounded-lg border border-accent/25 bg-accent-soft/40">
+      <div className="flex items-center gap-3 border-b border-accent/25 px-5 py-3">
         <span
           aria-hidden="true"
-          className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-white"
+          className="flex h-5 w-5 items-center justify-center rounded-full bg-accent ops-meta font-bold text-white"
         >
           C
         </span>
-        <span className="text-[11.5px] font-semibold text-accent-strong">Claude</span>
-        <span className="ml-auto rounded-full border border-warn/30 bg-warn-soft px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-warn">
+        <span className="ops-body font-semibold text-accent-strong">Claude</span>
+        <span className="ml-auto rounded-full border border-warn/30 bg-warn-soft px-3 py-1 ops-meta font-medium text-warn">
           Review required
         </span>
       </div>
 
-      <div className="space-y-3 px-3 py-2.5">
+      <div className="space-y-4 px-5 py-5">
         {/* The provider's own words, escaped by rendering as React text. */}
-        <p className="text-[12.5px] leading-relaxed text-ink">{narrative.overview.text}</p>
+        <p className="ops-prose text-ink">{narrative.overview.text}</p>
         {narrative.overview.citations.length > 0 ? (
           <Citations
             citations={narrative.overview.citations}
@@ -228,7 +228,7 @@ function Assistant({
           const canonical = statementById.get(finding.factId);
           return (
             <div key={finding.factId} className="space-y-1.5">
-              <p className="text-[12.5px] leading-relaxed text-ink">{finding.explanation}</p>
+              <p className="ops-prose text-ink">{finding.explanation}</p>
               {canonical ? (
                 <CanonicalCard statement={canonical} onOpenSource={onOpenSource} />
               ) : null}
@@ -238,21 +238,19 @@ function Assistant({
 
         {narrative.reviewNotes.length > 0 ? (
           <div>
-            <h4 className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-ink-muted">
-              Suggested review
-            </h4>
+            <h4 className="ops-body mb-2 font-semibold text-ink">Suggested review</h4>
             <ul className="space-y-1.5">
               {narrative.reviewNotes.map((note) => (
-                <li key={note.reviewStepId} className="text-[12.5px] text-ink">
+                <li key={note.reviewStepId} className="ops-prose text-ink">
                   {note.explanation}
-                  <span className="mt-0.5 block text-[11px] text-ink-muted">{note.label}</span>
+                  <span className="mt-0.5 block ops-meta text-ink-muted">{note.label}</span>
                 </li>
               ))}
             </ul>
           </div>
         ) : null}
 
-        <p className="border-t border-accent/20 pt-2 text-[11px] font-medium text-warn">
+        <p className="ops-body mt-4 border-t border-accent/25 pt-4 font-medium text-warn">
           {REVIEW_DISCLOSURE}
         </p>
       </div>
@@ -274,13 +272,11 @@ function CanonicalCard({
   onOpenSource: (source: SourceRef) => void;
 }) {
   return (
-    <div className="rounded-md border border-line bg-surface px-2.5 py-2">
-      <p className="text-[10.5px] font-semibold uppercase tracking-wide text-ink-muted">
-        OpsCheck finding
-      </p>
-      <p className="mt-0.5 text-[12px] text-ink">{statement.text}</p>
+    <div className="ops-inset bg-surface px-4 py-3">
+      <p className="ops-meta font-medium text-ink-muted">OpsCheck finding</p>
+      <p className="ops-body mt-1 text-ink">{statement.text}</p>
       {statement.sources.length > 0 ? (
-        <div className="mt-1.5 flex flex-wrap gap-1">
+        <div className="mt-2 flex flex-wrap gap-2">
           {statement.sources.map((entry, index) => (
             <SourceChip key={index} source={entry.source} onOpenSource={onOpenSource} />
           ))}
@@ -300,7 +296,7 @@ function Citations({
   onOpenSource: (source: SourceRef) => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-1">
+    <div className="flex flex-wrap gap-2">
       {citations.map((citation) => {
         const statement = statementById.get(citation.factId);
         const source = statement?.sources[0]?.source;
@@ -308,7 +304,7 @@ function Citations({
           return (
             <span
               key={citation.factId}
-              className="mono rounded border border-line bg-surface px-1.5 py-0.5 text-[10px] text-ink-muted"
+              className="mono inline-flex items-center rounded-[var(--radius-control)] border border-line bg-surface px-3 py-1 ops-meta text-ink-muted"
             >
               {citation.factId}
             </span>
@@ -339,10 +335,10 @@ function SourceChip({
         ', column ' +
         source.column
       }
-      className="mono inline-flex items-center gap-1 rounded border border-line-strong bg-surface px-1.5 py-0.5 text-[10px] text-accent transition-colors hover:border-accent hover:bg-accent-soft"
+      className="mono inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-control)] border border-line-strong bg-surface px-3 ops-meta text-accent transition-colors hover:border-accent hover:bg-accent-soft"
     >
-      <SourceGlyph className="h-2.5 w-2.5" />
-      {source.fileName} rec {source.recordNumber}
+      <SourceGlyph className="h-4 w-4" />
+      {source.fileName} · row {source.recordNumber}
     </button>
   );
 }
@@ -365,12 +361,10 @@ function EvidenceTray({
   const passed = applicable.filter((g) => g.status === 'PASSED').length;
 
   return (
-    <section aria-label="Evidence and validation" className="rounded-md border border-line bg-sunken px-3 py-2.5">
-      <h4 className="text-[11px] font-semibold uppercase tracking-wide text-ink-muted">
-        Evidence &amp; validation
-      </h4>
+    <section aria-label="Evidence and validation" className="ops-inset px-5 py-4">
+      <h4 className="ops-body font-semibold text-ink">Evidence &amp; validation</h4>
 
-      <dl className="mt-1.5 grid grid-cols-1 gap-x-4 gap-y-1.5 sm:grid-cols-2">
+      <dl className="mt-3 grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
         <Metric
           label="Engine-fact traceability"
           value={ratioText(traceability.verified, traceability.total)}
@@ -398,7 +392,7 @@ function EvidenceTray({
         <Metric label="Narrative factual confidence" value="Not calibrated" muted />
       </dl>
 
-      <p className="mt-2 border-t border-line pt-2 text-[11px] text-ink-muted">
+      <p className="ops-meta mt-4 max-w-[65ch] border-t border-line pt-3 text-ink-soft">
         The first three measure the deterministic evidence manifest. Explanation references confirm
         that cited ids resolve — <strong className="font-semibold text-ink-soft">not</strong> that the
         wording is entailed by them. There is no probability of real-world correctness here.
@@ -408,7 +402,7 @@ function EvidenceTray({
         type="button"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
-        className="mt-2 flex items-center gap-1.5 text-[11.5px] font-semibold text-ink-soft transition-colors hover:text-accent"
+        className="mt-2 flex items-center gap-1.5 ops-meta font-semibold text-ink-soft transition-colors hover:text-accent"
       >
         <ChevronGlyph open={open} />
         Check details
@@ -424,7 +418,7 @@ function EvidenceTray({
             />
           ) : null}
           {provider?.requestId ? (
-            <p className="mono text-[10.5px] text-ink-muted">request {provider.requestId}</p>
+            <p className="mono ops-meta text-ink-muted">request {provider.requestId}</p>
           ) : null}
         </div>
       ) : null}
@@ -463,10 +457,10 @@ function toNarrativeRow(check: NarrativeCheckResult): CheckRow {
 function CheckList({ title, items }: { title: string; items: CheckRow[] }) {
   return (
     <div>
-      <p className="text-[10.5px] font-semibold uppercase tracking-wide text-ink-muted">{title}</p>
+      <p className="ops-meta font-semibold uppercase tracking-wide text-ink-muted">{title}</p>
       <ul className="mt-1 space-y-1">
         {items.map((item) => (
-          <li key={item.key} className="flex items-start gap-2 text-[11.5px]">
+          <li key={item.key} className="flex items-start gap-2 ops-meta">
             <span
               className={
                 'mt-0.5 shrink-0 ' +
@@ -492,7 +486,7 @@ function CheckList({ title, items }: { title: string; items: CheckRow[] }) {
               </span>
               <span className="block text-ink-muted">{item.detail}</span>
               {item.codes.length > 0 ? (
-                <span className="mono block text-[10.5px] text-bad">{item.codes.join(', ')}</span>
+                <span className="mono block ops-meta text-bad">{item.codes.join(', ')}</span>
               ) : null}
             </span>
           </li>
@@ -513,10 +507,10 @@ function Metric({
 }) {
   return (
     <div>
-      <dt className="text-[10.5px] uppercase tracking-wide text-ink-muted">{label}</dt>
+      <dt className="ops-meta font-medium text-ink-muted">{label}</dt>
       <dd
         className={
-          'mono text-[12.5px] font-semibold ' + (muted ? 'text-ink-muted' : 'text-ink')
+          'mono ops-body mt-1 font-semibold ' + (muted ? 'text-ink-muted' : 'text-ink')
         }
       >
         {value}

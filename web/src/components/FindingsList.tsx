@@ -42,7 +42,7 @@ export function FindingsList({
     : 'Nothing has been evaluated yet.';
 
   return (
-    <Panel title="Findings" subtitle={subtitle} className="min-h-0" bodyClassName="scroll-panel">
+    <Panel title="Findings" subtitle={subtitle} className="min-h-0" bodyClassName="">
       {!hasRun ? (
         <EmptyState stale={stale} />
       ) : (
@@ -79,11 +79,11 @@ export function FindingsList({
 
           {report && report.dataStatus === 'READY' && groups.failed.length === 0 &&
           groups.blocked.length === 0 ? (
-            <div className="flex items-start gap-2.5 px-3.5 py-3">
+            <div className="flex items-start gap-3 px-6 py-5">
               <span className="mt-0.5 text-ok">
                 <CheckGlyph className="h-4 w-4" />
               </span>
-              <p className="text-[12.5px] text-ink-soft">
+              <p className="ops-body text-ink-soft">
                 No violations were found among the {report.checkCounts.passed} implemented checks.
                 That means the implemented rules passed, not that the plan is optimal, feasible in
                 the real warehouse, or the only workable schedule.
@@ -97,7 +97,7 @@ export function FindingsList({
                 type="button"
                 onClick={onTogglePassed}
                 aria-expanded={showPassed}
-                className="flex w-full items-center gap-2 px-3.5 py-2 text-left text-[12px] font-semibold text-ink-soft transition-colors hover:bg-sunken"
+                className="flex min-h-[3.25rem] w-full items-center gap-3 px-6 py-4 text-left ops-body font-semibold text-ink-soft transition-colors hover:bg-sunken"
               >
                 <ChevronGlyph open={showPassed} />
                 Passed checks
@@ -129,7 +129,7 @@ function EmptyState({ stale }: { stale: boolean }) {
       <span className="text-ink-muted">
         <IdleGlyph className="h-5 w-5" />
       </span>
-      <p className="max-w-[40ch] text-[12.5px] text-ink-muted">
+      <p className="max-w-[40ch] ops-body text-ink-muted">
         {stale
           ? 'Inputs changed, so the previous report no longer applies. Run checks again to produce findings for the current inputs.'
           : 'The inputs below are loaded and inspectable. Choose Run checks to evaluate the submitted plan against the five implemented rules.'}
@@ -153,11 +153,11 @@ function Group({
 }) {
   return (
     <div>
-      <div className="flex items-baseline gap-2 bg-sunken px-3.5 py-1.5">
-        <h3 className="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 bg-sunken px-6 py-3">
+        <h3 className="ops-meta font-semibold uppercase tracking-wide text-ink-soft">
           {title}
         </h3>
-        <span className="text-[11.5px] text-ink-muted">{hint}</span>
+        <span className="ops-meta text-ink-muted">{hint}</span>
       </div>
       <ul>
         {findings.map((finding) => (
@@ -191,7 +191,7 @@ function FindingRow({
         onClick={() => onSelect(finding.id)}
         aria-current={selected ? 'true' : undefined}
         className={
-          'flex w-full items-start gap-2.5 border-l-[3px] px-3 py-2 text-left transition-colors ' +
+          'flex min-h-[3.25rem] w-full items-start gap-3 border-l-4 px-6 py-4 text-left transition-colors ' +
           (selected
             ? 'border-l-accent bg-accent-soft/50'
             : 'border-l-transparent hover:bg-sunken')
@@ -199,11 +199,11 @@ function FindingRow({
       >
         <span className={'mt-0.5 shrink-0 ' + meta.iconClass}>{meta.glyph}</span>
         <span className="min-w-0 flex-1">
-          <span className="block text-[12.5px] leading-snug text-ink">{meta.summary}</span>
+          <span className="block ops-body text-ink">{meta.summary}</span>
           <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
-            <code className="mono text-[11px] text-ink-muted">{meta.code}</code>
+            <code className="mono ops-meta text-ink-muted">{meta.code}</code>
             {meta.subject ? (
-              <span className="mono text-[11px] text-ink-muted">{meta.subject}</span>
+              <span className="mono ops-meta text-ink-muted">{meta.subject}</span>
             ) : null}
           </span>
         </span>

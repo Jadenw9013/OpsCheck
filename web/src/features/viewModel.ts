@@ -410,7 +410,9 @@ function buildAxis(values: number[]): TimelineAxis {
   if (hi - lo < MIN_SPAN) hi = lo + MIN_SPAN;
 
   const span = hi - lo;
-  const step = TICK_STEPS.find((s) => span / s <= 8) ?? Math.ceil(span / 8);
+  // Labels are 14px now, so fewer, well-spaced ticks read better than a dense
+  // row that collides. Gridlines still mark every tick that is drawn.
+  const step = TICK_STEPS.find((s) => span / s <= 5) ?? Math.ceil(span / 5);
 
   const ticks: number[] = [];
   for (let t = lo; t <= hi; t += step) ticks.push(t);
