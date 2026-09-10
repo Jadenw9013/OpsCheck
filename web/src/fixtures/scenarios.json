@@ -1,0 +1,514 @@
+{
+  "schemaVersion": "1.0",
+  "timeBasis": {
+    "label": "Synthetic same-day minutes since 08:00",
+    "startClock": "08:00",
+    "maxMinute": 720
+  },
+  "scenarios": [
+    {
+      "id": "S00",
+      "title": "Baseline",
+      "description": "Eight orders fit the modeled constraints. Touching worker intervals are allowed.",
+      "origin": "SYNTHETIC",
+      "files": {
+        "orders": {
+          "fileName": "orders.csv",
+          "profile": "standard",
+          "csvText": "order_id,pick_minutes,pack_minutes,departure_id\nO-101,20,15,D-1\nO-102,25,15,D-1\nO-103,15,10,D-1\nO-104,20,30,D-1\nO-105,30,15,D-2\nO-106,25,20,D-2\nO-107,20,10,D-2\nO-108,25,15,D-2\n"
+        },
+        "departures": {
+          "fileName": "departures.csv",
+          "profile": "standard",
+          "csvText": "departure_id,departure_minute\nD-1,120\nD-2,180\n"
+        },
+        "workers": {
+          "fileName": "workers.csv",
+          "profile": "standard",
+          "csvText": "worker_id,available_from_minute,available_to_minute\nW-1,0,180\nW-2,0,180\n"
+        },
+        "plan": {
+          "fileName": "plan.csv",
+          "profile": "standard",
+          "csvText": "assignment_id,order_id,worker_id,start_minute,end_minute\nA-1,O-101,W-1,0,20\nA-2,O-102,W-2,0,25\nA-3,O-103,W-1,20,35\nA-4,O-104,W-2,25,45\nA-5,O-105,W-1,35,65\nA-6,O-106,W-2,45,70\nA-7,O-107,W-1,65,85\nA-8,O-108,W-2,70,95\n"
+        }
+      }
+    },
+    {
+      "id": "S01",
+      "title": "Earlier departure",
+      "description": "D-1 moves to minute 65. O-104 is modeled ready at minute 75, ten minutes late.",
+      "origin": "SYNTHETIC",
+      "files": {
+        "orders": {
+          "fileName": "orders.csv",
+          "profile": "standard",
+          "csvText": "order_id,pick_minutes,pack_minutes,departure_id\nO-101,20,15,D-1\nO-102,25,15,D-1\nO-103,15,10,D-1\nO-104,20,30,D-1\nO-105,30,15,D-2\nO-106,25,20,D-2\nO-107,20,10,D-2\nO-108,25,15,D-2\n"
+        },
+        "departures": {
+          "fileName": "departures.csv",
+          "profile": "standard",
+          "csvText": "departure_id,departure_minute\nD-1,65\nD-2,180\n"
+        },
+        "workers": {
+          "fileName": "workers.csv",
+          "profile": "standard",
+          "csvText": "worker_id,available_from_minute,available_to_minute\nW-1,0,180\nW-2,0,180\n"
+        },
+        "plan": {
+          "fileName": "plan.csv",
+          "profile": "standard",
+          "csvText": "assignment_id,order_id,worker_id,start_minute,end_minute\nA-1,O-101,W-1,0,20\nA-2,O-102,W-2,0,25\nA-3,O-103,W-1,20,35\nA-4,O-104,W-2,25,45\nA-5,O-105,W-1,35,65\nA-6,O-106,W-2,45,70\nA-7,O-107,W-1,65,85\nA-8,O-108,W-2,70,95\n"
+        }
+      }
+    },
+    {
+      "id": "S02",
+      "title": "Missing packing duration",
+      "description": "O-104 has no packing duration. Plan evaluation must not run.",
+      "origin": "SYNTHETIC",
+      "files": {
+        "orders": {
+          "fileName": "orders.csv",
+          "profile": "standard",
+          "csvText": "order_id,pick_minutes,pack_minutes,departure_id\nO-101,20,15,D-1\nO-102,25,15,D-1\nO-103,15,10,D-1\nO-104,20,,D-1\nO-105,30,15,D-2\nO-106,25,20,D-2\nO-107,20,10,D-2\nO-108,25,15,D-2\n"
+        },
+        "departures": {
+          "fileName": "departures.csv",
+          "profile": "standard",
+          "csvText": "departure_id,departure_minute\nD-1,120\nD-2,180\n"
+        },
+        "workers": {
+          "fileName": "workers.csv",
+          "profile": "standard",
+          "csvText": "worker_id,available_from_minute,available_to_minute\nW-1,0,180\nW-2,0,180\n"
+        },
+        "plan": {
+          "fileName": "plan.csv",
+          "profile": "standard",
+          "csvText": "assignment_id,order_id,worker_id,start_minute,end_minute\nA-1,O-101,W-1,0,20\nA-2,O-102,W-2,0,25\nA-3,O-103,W-1,20,35\nA-4,O-104,W-2,25,45\nA-5,O-105,W-1,35,65\nA-6,O-106,W-2,45,70\nA-7,O-107,W-1,65,85\nA-8,O-108,W-2,70,95\n"
+        }
+      }
+    },
+    {
+      "id": "S03",
+      "title": "Worker overlap",
+      "description": "A-3 moves to [15,30). It overlaps A-1 on W-1 by five minutes.",
+      "origin": "SYNTHETIC",
+      "files": {
+        "orders": {
+          "fileName": "orders.csv",
+          "profile": "standard",
+          "csvText": "order_id,pick_minutes,pack_minutes,departure_id\nO-101,20,15,D-1\nO-102,25,15,D-1\nO-103,15,10,D-1\nO-104,20,30,D-1\nO-105,30,15,D-2\nO-106,25,20,D-2\nO-107,20,10,D-2\nO-108,25,15,D-2\n"
+        },
+        "departures": {
+          "fileName": "departures.csv",
+          "profile": "standard",
+          "csvText": "departure_id,departure_minute\nD-1,120\nD-2,180\n"
+        },
+        "workers": {
+          "fileName": "workers.csv",
+          "profile": "standard",
+          "csvText": "worker_id,available_from_minute,available_to_minute\nW-1,0,180\nW-2,0,180\n"
+        },
+        "plan": {
+          "fileName": "plan.csv",
+          "profile": "standard",
+          "csvText": "assignment_id,order_id,worker_id,start_minute,end_minute\nA-1,O-101,W-1,0,20\nA-2,O-102,W-2,0,25\nA-3,O-103,W-1,15,30\nA-4,O-104,W-2,25,45\nA-5,O-105,W-1,35,65\nA-6,O-106,W-2,45,70\nA-7,O-107,W-1,65,85\nA-8,O-108,W-2,70,95\n"
+        }
+      }
+    },
+    {
+      "id": "S04",
+      "title": "Worker unavailable",
+      "description": "W-1 availability begins at minute 10; A-1 begins ten minutes too early.",
+      "origin": "SYNTHETIC",
+      "files": {
+        "orders": {
+          "fileName": "orders.csv",
+          "profile": "standard",
+          "csvText": "order_id,pick_minutes,pack_minutes,departure_id\nO-101,20,15,D-1\nO-102,25,15,D-1\nO-103,15,10,D-1\nO-104,20,30,D-1\nO-105,30,15,D-2\nO-106,25,20,D-2\nO-107,20,10,D-2\nO-108,25,15,D-2\n"
+        },
+        "departures": {
+          "fileName": "departures.csv",
+          "profile": "standard",
+          "csvText": "departure_id,departure_minute\nD-1,120\nD-2,180\n"
+        },
+        "workers": {
+          "fileName": "workers.csv",
+          "profile": "standard",
+          "csvText": "worker_id,available_from_minute,available_to_minute\nW-1,10,180\nW-2,0,180\n"
+        },
+        "plan": {
+          "fileName": "plan.csv",
+          "profile": "standard",
+          "csvText": "assignment_id,order_id,worker_id,start_minute,end_minute\nA-1,O-101,W-1,0,20\nA-2,O-102,W-2,0,25\nA-3,O-103,W-1,20,35\nA-4,O-104,W-2,25,45\nA-5,O-105,W-1,35,65\nA-6,O-106,W-2,45,70\nA-7,O-107,W-1,65,85\nA-8,O-108,W-2,70,95\n"
+        }
+      }
+    },
+    {
+      "id": "S05",
+      "title": "Exact deadline",
+      "description": "D-1 leaves at minute 75, exactly the modeled ready time of O-104.",
+      "origin": "SYNTHETIC",
+      "files": {
+        "orders": {
+          "fileName": "orders.csv",
+          "profile": "standard",
+          "csvText": "order_id,pick_minutes,pack_minutes,departure_id\nO-101,20,15,D-1\nO-102,25,15,D-1\nO-103,15,10,D-1\nO-104,20,30,D-1\nO-105,30,15,D-2\nO-106,25,20,D-2\nO-107,20,10,D-2\nO-108,25,15,D-2\n"
+        },
+        "departures": {
+          "fileName": "departures.csv",
+          "profile": "standard",
+          "csvText": "departure_id,departure_minute\nD-1,75\nD-2,180\n"
+        },
+        "workers": {
+          "fileName": "workers.csv",
+          "profile": "standard",
+          "csvText": "worker_id,available_from_minute,available_to_minute\nW-1,0,180\nW-2,0,180\n"
+        },
+        "plan": {
+          "fileName": "plan.csv",
+          "profile": "standard",
+          "csvText": "assignment_id,order_id,worker_id,start_minute,end_minute\nA-1,O-101,W-1,0,20\nA-2,O-102,W-2,0,25\nA-3,O-103,W-1,20,35\nA-4,O-104,W-2,25,45\nA-5,O-105,W-1,35,65\nA-6,O-106,W-2,45,70\nA-7,O-107,W-1,65,85\nA-8,O-108,W-2,70,95\n"
+        }
+      }
+    },
+    {
+      "id": "S06",
+      "title": "Insufficient picking time",
+      "description": "A-1 has 19 minutes assigned but O-101 requires 20.",
+      "origin": "SYNTHETIC",
+      "files": {
+        "orders": {
+          "fileName": "orders.csv",
+          "profile": "standard",
+          "csvText": "order_id,pick_minutes,pack_minutes,departure_id\nO-101,20,15,D-1\nO-102,25,15,D-1\nO-103,15,10,D-1\nO-104,20,30,D-1\nO-105,30,15,D-2\nO-106,25,20,D-2\nO-107,20,10,D-2\nO-108,25,15,D-2\n"
+        },
+        "departures": {
+          "fileName": "departures.csv",
+          "profile": "standard",
+          "csvText": "departure_id,departure_minute\nD-1,120\nD-2,180\n"
+        },
+        "workers": {
+          "fileName": "workers.csv",
+          "profile": "standard",
+          "csvText": "worker_id,available_from_minute,available_to_minute\nW-1,0,180\nW-2,0,180\n"
+        },
+        "plan": {
+          "fileName": "plan.csv",
+          "profile": "standard",
+          "csvText": "assignment_id,order_id,worker_id,start_minute,end_minute\nA-1,O-101,W-1,0,19\nA-2,O-102,W-2,0,25\nA-3,O-103,W-1,20,35\nA-4,O-104,W-2,25,45\nA-5,O-105,W-1,35,65\nA-6,O-106,W-2,45,70\nA-7,O-107,W-1,65,85\nA-8,O-108,W-2,70,95\n"
+        }
+      }
+    },
+    {
+      "id": "S07",
+      "title": "Unassigned order",
+      "description": "A-4 is removed; O-104 has no assignment. Its departure check is blocked.",
+      "origin": "SYNTHETIC",
+      "files": {
+        "orders": {
+          "fileName": "orders.csv",
+          "profile": "standard",
+          "csvText": "order_id,pick_minutes,pack_minutes,departure_id\nO-101,20,15,D-1\nO-102,25,15,D-1\nO-103,15,10,D-1\nO-104,20,30,D-1\nO-105,30,15,D-2\nO-106,25,20,D-2\nO-107,20,10,D-2\nO-108,25,15,D-2\n"
+        },
+        "departures": {
+          "fileName": "departures.csv",
+          "profile": "standard",
+          "csvText": "departure_id,departure_minute\nD-1,120\nD-2,180\n"
+        },
+        "workers": {
+          "fileName": "workers.csv",
+          "profile": "standard",
+          "csvText": "worker_id,available_from_minute,available_to_minute\nW-1,0,180\nW-2,0,180\n"
+        },
+        "plan": {
+          "fileName": "plan.csv",
+          "profile": "standard",
+          "csvText": "assignment_id,order_id,worker_id,start_minute,end_minute\nA-1,O-101,W-1,0,20\nA-2,O-102,W-2,0,25\nA-3,O-103,W-1,20,35\nA-5,O-105,W-1,35,65\nA-6,O-106,W-2,45,70\nA-7,O-107,W-1,65,85\nA-8,O-108,W-2,70,95\n"
+        }
+      }
+    },
+    {
+      "id": "S08",
+      "title": "Duplicate order assignment",
+      "description": "A-9 also assigns O-101, without creating a worker conflict. O-101 departure evaluation is blocked.",
+      "origin": "SYNTHETIC",
+      "files": {
+        "orders": {
+          "fileName": "orders.csv",
+          "profile": "standard",
+          "csvText": "order_id,pick_minutes,pack_minutes,departure_id\nO-101,20,15,D-1\nO-102,25,15,D-1\nO-103,15,10,D-1\nO-104,20,30,D-1\nO-105,30,15,D-2\nO-106,25,20,D-2\nO-107,20,10,D-2\nO-108,25,15,D-2\n"
+        },
+        "departures": {
+          "fileName": "departures.csv",
+          "profile": "standard",
+          "csvText": "departure_id,departure_minute\nD-1,120\nD-2,180\n"
+        },
+        "workers": {
+          "fileName": "workers.csv",
+          "profile": "standard",
+          "csvText": "worker_id,available_from_minute,available_to_minute\nW-1,0,180\nW-2,0,180\n"
+        },
+        "plan": {
+          "fileName": "plan.csv",
+          "profile": "standard",
+          "csvText": "assignment_id,order_id,worker_id,start_minute,end_minute\nA-1,O-101,W-1,0,20\nA-2,O-102,W-2,0,25\nA-3,O-103,W-1,20,35\nA-4,O-104,W-2,25,45\nA-5,O-105,W-1,35,65\nA-6,O-106,W-2,45,70\nA-7,O-107,W-1,65,85\nA-8,O-108,W-2,70,95\nA-9,O-101,W-2,120,140\n"
+        }
+      }
+    },
+    {
+      "id": "S09",
+      "title": "Unknown worker",
+      "description": "A-1 references W-9, which is not in the worker export.",
+      "origin": "SYNTHETIC",
+      "files": {
+        "orders": {
+          "fileName": "orders.csv",
+          "profile": "standard",
+          "csvText": "order_id,pick_minutes,pack_minutes,departure_id\nO-101,20,15,D-1\nO-102,25,15,D-1\nO-103,15,10,D-1\nO-104,20,30,D-1\nO-105,30,15,D-2\nO-106,25,20,D-2\nO-107,20,10,D-2\nO-108,25,15,D-2\n"
+        },
+        "departures": {
+          "fileName": "departures.csv",
+          "profile": "standard",
+          "csvText": "departure_id,departure_minute\nD-1,120\nD-2,180\n"
+        },
+        "workers": {
+          "fileName": "workers.csv",
+          "profile": "standard",
+          "csvText": "worker_id,available_from_minute,available_to_minute\nW-1,0,180\nW-2,0,180\n"
+        },
+        "plan": {
+          "fileName": "plan.csv",
+          "profile": "standard",
+          "csvText": "assignment_id,order_id,worker_id,start_minute,end_minute\nA-1,O-101,W-9,0,20\nA-2,O-102,W-2,0,25\nA-3,O-103,W-1,20,35\nA-4,O-104,W-2,25,45\nA-5,O-105,W-1,35,65\nA-6,O-106,W-2,45,70\nA-7,O-107,W-1,65,85\nA-8,O-108,W-2,70,95\n"
+        }
+      }
+    },
+    {
+      "id": "S10",
+      "title": "Negative duration",
+      "description": "O-104 packing duration is -1, which is invalid rather than missing.",
+      "origin": "SYNTHETIC",
+      "files": {
+        "orders": {
+          "fileName": "orders.csv",
+          "profile": "standard",
+          "csvText": "order_id,pick_minutes,pack_minutes,departure_id\nO-101,20,15,D-1\nO-102,25,15,D-1\nO-103,15,10,D-1\nO-104,20,-1,D-1\nO-105,30,15,D-2\nO-106,25,20,D-2\nO-107,20,10,D-2\nO-108,25,15,D-2\n"
+        },
+        "departures": {
+          "fileName": "departures.csv",
+          "profile": "standard",
+          "csvText": "departure_id,departure_minute\nD-1,120\nD-2,180\n"
+        },
+        "workers": {
+          "fileName": "workers.csv",
+          "profile": "standard",
+          "csvText": "worker_id,available_from_minute,available_to_minute\nW-1,0,180\nW-2,0,180\n"
+        },
+        "plan": {
+          "fileName": "plan.csv",
+          "profile": "standard",
+          "csvText": "assignment_id,order_id,worker_id,start_minute,end_minute\nA-1,O-101,W-1,0,20\nA-2,O-102,W-2,0,25\nA-3,O-103,W-1,20,35\nA-4,O-104,W-2,25,45\nA-5,O-105,W-1,35,65\nA-6,O-106,W-2,45,70\nA-7,O-107,W-1,65,85\nA-8,O-108,W-2,70,95\n"
+        }
+      }
+    },
+    {
+      "id": "S11",
+      "title": "Duplicate order identifier",
+      "description": "A second O-101 order record is present; do not silently choose the first or last.",
+      "origin": "SYNTHETIC",
+      "files": {
+        "orders": {
+          "fileName": "orders.csv",
+          "profile": "standard",
+          "csvText": "order_id,pick_minutes,pack_minutes,departure_id\nO-101,20,15,D-1\nO-102,25,15,D-1\nO-103,15,10,D-1\nO-104,20,30,D-1\nO-105,30,15,D-2\nO-106,25,20,D-2\nO-107,20,10,D-2\nO-108,25,15,D-2\nO-101,20,15,D-1\n"
+        },
+        "departures": {
+          "fileName": "departures.csv",
+          "profile": "standard",
+          "csvText": "departure_id,departure_minute\nD-1,120\nD-2,180\n"
+        },
+        "workers": {
+          "fileName": "workers.csv",
+          "profile": "standard",
+          "csvText": "worker_id,available_from_minute,available_to_minute\nW-1,0,180\nW-2,0,180\n"
+        },
+        "plan": {
+          "fileName": "plan.csv",
+          "profile": "standard",
+          "csvText": "assignment_id,order_id,worker_id,start_minute,end_minute\nA-1,O-101,W-1,0,20\nA-2,O-102,W-2,0,25\nA-3,O-103,W-1,20,35\nA-4,O-104,W-2,25,45\nA-5,O-105,W-1,35,65\nA-6,O-106,W-2,45,70\nA-7,O-107,W-1,65,85\nA-8,O-108,W-2,70,95\n"
+        }
+      }
+    },
+    {
+      "id": "S12",
+      "title": "Unknown departure",
+      "description": "O-104 references D-9, which is absent from the departure export.",
+      "origin": "SYNTHETIC",
+      "files": {
+        "orders": {
+          "fileName": "orders.csv",
+          "profile": "standard",
+          "csvText": "order_id,pick_minutes,pack_minutes,departure_id\nO-101,20,15,D-1\nO-102,25,15,D-1\nO-103,15,10,D-1\nO-104,20,30,D-9\nO-105,30,15,D-2\nO-106,25,20,D-2\nO-107,20,10,D-2\nO-108,25,15,D-2\n"
+        },
+        "departures": {
+          "fileName": "departures.csv",
+          "profile": "standard",
+          "csvText": "departure_id,departure_minute\nD-1,120\nD-2,180\n"
+        },
+        "workers": {
+          "fileName": "workers.csv",
+          "profile": "standard",
+          "csvText": "worker_id,available_from_minute,available_to_minute\nW-1,0,180\nW-2,0,180\n"
+        },
+        "plan": {
+          "fileName": "plan.csv",
+          "profile": "standard",
+          "csvText": "assignment_id,order_id,worker_id,start_minute,end_minute\nA-1,O-101,W-1,0,20\nA-2,O-102,W-2,0,25\nA-3,O-103,W-1,20,35\nA-4,O-104,W-2,25,45\nA-5,O-105,W-1,35,65\nA-6,O-106,W-2,45,70\nA-7,O-107,W-1,65,85\nA-8,O-108,W-2,70,95\n"
+        }
+      }
+    },
+    {
+      "id": "S13",
+      "title": "Non-numeric duration",
+      "description": "O-104 packing duration is soon, not a valid integer.",
+      "origin": "SYNTHETIC",
+      "files": {
+        "orders": {
+          "fileName": "orders.csv",
+          "profile": "standard",
+          "csvText": "order_id,pick_minutes,pack_minutes,departure_id\nO-101,20,15,D-1\nO-102,25,15,D-1\nO-103,15,10,D-1\nO-104,20,soon,D-1\nO-105,30,15,D-2\nO-106,25,20,D-2\nO-107,20,10,D-2\nO-108,25,15,D-2\n"
+        },
+        "departures": {
+          "fileName": "departures.csv",
+          "profile": "standard",
+          "csvText": "departure_id,departure_minute\nD-1,120\nD-2,180\n"
+        },
+        "workers": {
+          "fileName": "workers.csv",
+          "profile": "standard",
+          "csvText": "worker_id,available_from_minute,available_to_minute\nW-1,0,180\nW-2,0,180\n"
+        },
+        "plan": {
+          "fileName": "plan.csv",
+          "profile": "standard",
+          "csvText": "assignment_id,order_id,worker_id,start_minute,end_minute\nA-1,O-101,W-1,0,20\nA-2,O-102,W-2,0,25\nA-3,O-103,W-1,20,35\nA-4,O-104,W-2,25,45\nA-5,O-105,W-1,35,65\nA-6,O-106,W-2,45,70\nA-7,O-107,W-1,65,85\nA-8,O-108,W-2,70,95\n"
+        }
+      }
+    },
+    {
+      "id": "S14",
+      "title": "Reversed interval",
+      "description": "A-1 starts at minute 30 and ends at minute 20.",
+      "origin": "SYNTHETIC",
+      "files": {
+        "orders": {
+          "fileName": "orders.csv",
+          "profile": "standard",
+          "csvText": "order_id,pick_minutes,pack_minutes,departure_id\nO-101,20,15,D-1\nO-102,25,15,D-1\nO-103,15,10,D-1\nO-104,20,30,D-1\nO-105,30,15,D-2\nO-106,25,20,D-2\nO-107,20,10,D-2\nO-108,25,15,D-2\n"
+        },
+        "departures": {
+          "fileName": "departures.csv",
+          "profile": "standard",
+          "csvText": "departure_id,departure_minute\nD-1,120\nD-2,180\n"
+        },
+        "workers": {
+          "fileName": "workers.csv",
+          "profile": "standard",
+          "csvText": "worker_id,available_from_minute,available_to_minute\nW-1,0,180\nW-2,0,180\n"
+        },
+        "plan": {
+          "fileName": "plan.csv",
+          "profile": "standard",
+          "csvText": "assignment_id,order_id,worker_id,start_minute,end_minute\nA-1,O-101,W-1,30,20\nA-2,O-102,W-2,0,25\nA-3,O-103,W-1,20,35\nA-4,O-104,W-2,25,45\nA-5,O-105,W-1,35,65\nA-6,O-106,W-2,45,70\nA-7,O-107,W-1,65,85\nA-8,O-108,W-2,70,95\n"
+        }
+      }
+    },
+    {
+      "id": "S15",
+      "title": "Missing mapped header",
+      "description": "The orders export is missing pack_minutes. Report one header diagnostic, not eight fake missing cells.",
+      "origin": "SYNTHETIC",
+      "files": {
+        "orders": {
+          "fileName": "orders.csv",
+          "profile": "standard",
+          "csvText": "order_id,pick_minutes,departure_id\nO-101,20,D-1\nO-102,25,D-1\nO-103,15,D-1\nO-104,20,D-1\nO-105,30,D-2\nO-106,25,D-2\nO-107,20,D-2\nO-108,25,D-2\n"
+        },
+        "departures": {
+          "fileName": "departures.csv",
+          "profile": "standard",
+          "csvText": "departure_id,departure_minute\nD-1,120\nD-2,180\n"
+        },
+        "workers": {
+          "fileName": "workers.csv",
+          "profile": "standard",
+          "csvText": "worker_id,available_from_minute,available_to_minute\nW-1,0,180\nW-2,0,180\n"
+        },
+        "plan": {
+          "fileName": "plan.csv",
+          "profile": "standard",
+          "csvText": "assignment_id,order_id,worker_id,start_minute,end_minute\nA-1,O-101,W-1,0,20\nA-2,O-102,W-2,0,25\nA-3,O-103,W-1,20,35\nA-4,O-104,W-2,25,45\nA-5,O-105,W-1,35,65\nA-6,O-106,W-2,45,70\nA-7,O-107,W-1,65,85\nA-8,O-108,W-2,70,95\n"
+        }
+      }
+    },
+    {
+      "id": "S16",
+      "title": "Warehouse B mapping",
+      "description": "A second explicit export profile normalizes to the same operational values as the baseline.",
+      "origin": "SYNTHETIC",
+      "files": {
+        "orders": {
+          "fileName": "orders.csv",
+          "profile": "warehouse_b",
+          "csvText": "OrderRef,PickMins,PackMins,TruckRef\nO-101,20,15,D-1\nO-102,25,15,D-1\nO-103,15,10,D-1\nO-104,20,30,D-1\nO-105,30,15,D-2\nO-106,25,20,D-2\nO-107,20,10,D-2\nO-108,25,15,D-2\n"
+        },
+        "departures": {
+          "fileName": "departures.csv",
+          "profile": "warehouse_b",
+          "csvText": "TruckRef,DepartsAtMinute\nD-1,120\nD-2,180\n"
+        },
+        "workers": {
+          "fileName": "workers.csv",
+          "profile": "standard",
+          "csvText": "worker_id,available_from_minute,available_to_minute\nW-1,0,180\nW-2,0,180\n"
+        },
+        "plan": {
+          "fileName": "plan.csv",
+          "profile": "standard",
+          "csvText": "assignment_id,order_id,worker_id,start_minute,end_minute\nA-1,O-101,W-1,0,20\nA-2,O-102,W-2,0,25\nA-3,O-103,W-1,20,35\nA-4,O-104,W-2,25,45\nA-5,O-105,W-1,35,65\nA-6,O-106,W-2,45,70\nA-7,O-107,W-1,65,85\nA-8,O-108,W-2,70,95\n"
+        }
+      }
+    },
+    {
+      "id": "S17",
+      "title": "Missing and invalid inputs",
+      "description": "Show both problems. INVALID takes precedence over INCOMPLETE; no plan rules run.",
+      "origin": "SYNTHETIC",
+      "files": {
+        "orders": {
+          "fileName": "orders.csv",
+          "profile": "standard",
+          "csvText": "order_id,pick_minutes,pack_minutes,departure_id\nO-101,20,15,D-1\nO-102,25,15,D-1\nO-103,15,10,D-1\nO-104,20,,D-1\nO-105,30,15,D-2\nO-106,25,20,D-2\nO-107,20,10,D-2\nO-108,25,15,D-2\n"
+        },
+        "departures": {
+          "fileName": "departures.csv",
+          "profile": "standard",
+          "csvText": "departure_id,departure_minute\nD-1,120\nD-2,180\n"
+        },
+        "workers": {
+          "fileName": "workers.csv",
+          "profile": "standard",
+          "csvText": "worker_id,available_from_minute,available_to_minute\nW-1,0,180\nW-2,0,180\n"
+        },
+        "plan": {
+          "fileName": "plan.csv",
+          "profile": "standard",
+          "csvText": "assignment_id,order_id,worker_id,start_minute,end_minute\nA-1,O-101,W-9,0,20\nA-2,O-102,W-2,0,25\nA-3,O-103,W-1,20,35\nA-4,O-104,W-2,25,45\nA-5,O-105,W-1,35,65\nA-6,O-106,W-2,45,70\nA-7,O-107,W-1,65,85\nA-8,O-108,W-2,70,95\n"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+worker_id,available_from_minute,available_to_minute
+W-1,0,180
+W-2,0,180

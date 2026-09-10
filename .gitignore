@@ -1,0 +1,37 @@
+# OpsCheck root .gitignore
+
+# Environment / secrets — never commit real keys
+.env
+.env.local
+.env*.local
+
+# Next.js build outputs
+web/.next/
+web/out/
+web/build/
+
+# Dependencies
+web/node_modules/
+
+# TypeScript build info
+web/*.tsbuildinfo
+web/next-env.d.ts
+
+# Test artifacts
+web/test-results/
+web/coverage/
+
+# Playwright
+web/playwright-report/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Antigravity / agent working files
+.gemini/

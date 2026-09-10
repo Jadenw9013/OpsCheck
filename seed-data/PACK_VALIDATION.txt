@@ -1,0 +1,20 @@
+S00 oracle matches independent calculation
+S01 oracle matches independent calculation
+S02 oracle matches independent calculation
+S03 oracle matches independent calculation
+S04 oracle matches independent calculation
+S05 oracle matches independent calculation
+S06 oracle matches independent calculation
+S07 oracle matches independent calculation
+S08 oracle matches independent calculation
+S09 oracle matches independent calculation
+S10 oracle matches independent calculation
+S11 oracle matches independent calculation
+S12 oracle matches independent calculation
+S13 oracle matches independent calculation
+S14 oracle matches independent calculation
+S15 oracle matches independent calculation
+S16 oracle matches independent calculation
+S17 oracle matches independent calculation
+PASS: 18 seed/oracle cases; flagship source references; 17 Markdown documents; balanced code fences; 7 CSV samples; documented rule/diagnostic IDs.
+NOT RUN: Future Next.js/TypeScript application, npm tests, production build, or browser checks. This validates the plan pack only.

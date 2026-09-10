@@ -1,0 +1,482 @@
+{
+  "contractVersion": "1.0",
+  "ruleOrder": [
+    "PLAN_ASSIGNMENT_COUNT",
+    "PLAN_PICK_DURATION",
+    "PLAN_WORKER_AVAILABILITY",
+    "PLAN_WORKER_OVERLAP",
+    "PLAN_READY_BY_DEPARTURE"
+  ],
+  "expectations": [
+    {
+      "scenarioId": "S00",
+      "dataStatus": "READY",
+      "planStatus": "PASS",
+      "diagnostics": [],
+      "failedChecks": [],
+      "blockedChecks": [],
+      "checkCounts": {
+        "passed": 44,
+        "failed": 0,
+        "blocked": 0
+      },
+      "blockedRuleIds": []
+    },
+    {
+      "scenarioId": "S01",
+      "dataStatus": "READY",
+      "planStatus": "VIOLATIONS",
+      "diagnostics": [],
+      "failedChecks": [
+        {
+          "ruleId": "PLAN_READY_BY_DEPARTURE",
+          "subjectIds": [
+            "O-104"
+          ],
+          "metrics": {
+            "pickEndMinute": 45,
+            "packMinutes": 30,
+            "readyMinute": 75,
+            "departureMinute": 65,
+            "slackMinutes": -10,
+            "lateMinutes": 10
+          }
+        }
+      ],
+      "blockedChecks": [],
+      "checkCounts": {
+        "passed": 43,
+        "failed": 1,
+        "blocked": 0
+      },
+      "blockedRuleIds": []
+    },
+    {
+      "scenarioId": "S02",
+      "dataStatus": "INCOMPLETE",
+      "planStatus": "NOT_EVALUATED",
+      "diagnostics": [
+        {
+          "code": "DATA_MISSING_VALUE",
+          "table": "orders",
+          "recordNumber": 5,
+          "column": "pack_minutes"
+        }
+      ],
+      "failedChecks": [],
+      "blockedChecks": [],
+      "checkCounts": {
+        "passed": 0,
+        "failed": 0,
+        "blocked": 0
+      },
+      "blockedRuleIds": [
+        "PLAN_ASSIGNMENT_COUNT",
+        "PLAN_PICK_DURATION",
+        "PLAN_WORKER_AVAILABILITY",
+        "PLAN_WORKER_OVERLAP",
+        "PLAN_READY_BY_DEPARTURE"
+      ]
+    },
+    {
+      "scenarioId": "S03",
+      "dataStatus": "READY",
+      "planStatus": "VIOLATIONS",
+      "diagnostics": [],
+      "failedChecks": [
+        {
+          "ruleId": "PLAN_WORKER_OVERLAP",
+          "subjectIds": [
+            "A-1",
+            "A-3"
+          ],
+          "metrics": {
+            "overlapMinutes": 5
+          }
+        }
+      ],
+      "blockedChecks": [],
+      "checkCounts": {
+        "passed": 43,
+        "failed": 1,
+        "blocked": 0
+      },
+      "blockedRuleIds": []
+    },
+    {
+      "scenarioId": "S04",
+      "dataStatus": "READY",
+      "planStatus": "VIOLATIONS",
+      "diagnostics": [],
+      "failedChecks": [
+        {
+          "ruleId": "PLAN_WORKER_AVAILABILITY",
+          "subjectIds": [
+            "A-1"
+          ],
+          "metrics": {
+            "startMinute": 0,
+            "endMinute": 20,
+            "availableFromMinute": 10,
+            "availableToMinute": 180
+          }
+        }
+      ],
+      "blockedChecks": [],
+      "checkCounts": {
+        "passed": 43,
+        "failed": 1,
+        "blocked": 0
+      },
+      "blockedRuleIds": []
+    },
+    {
+      "scenarioId": "S05",
+      "dataStatus": "READY",
+      "planStatus": "PASS",
+      "diagnostics": [],
+      "failedChecks": [],
+      "blockedChecks": [],
+      "checkCounts": {
+        "passed": 44,
+        "failed": 0,
+        "blocked": 0
+      },
+      "blockedRuleIds": []
+    },
+    {
+      "scenarioId": "S06",
+      "dataStatus": "READY",
+      "planStatus": "VIOLATIONS",
+      "diagnostics": [],
+      "failedChecks": [
+        {
+          "ruleId": "PLAN_PICK_DURATION",
+          "subjectIds": [
+            "A-1"
+          ],
+          "metrics": {
+            "allocatedMinutes": 19,
+            "requiredMinutes": 20,
+            "shortfallMinutes": 1
+          }
+        }
+      ],
+      "blockedChecks": [],
+      "checkCounts": {
+        "passed": 43,
+        "failed": 1,
+        "blocked": 0
+      },
+      "blockedRuleIds": []
+    },
+    {
+      "scenarioId": "S07",
+      "dataStatus": "READY",
+      "planStatus": "VIOLATIONS",
+      "diagnostics": [],
+      "failedChecks": [
+        {
+          "ruleId": "PLAN_ASSIGNMENT_COUNT",
+          "subjectIds": [
+            "O-104"
+          ],
+          "metrics": {
+            "assignmentCount": 0
+          }
+        }
+      ],
+      "blockedChecks": [
+        {
+          "ruleId": "PLAN_READY_BY_DEPARTURE",
+          "subjectIds": [
+            "O-104"
+          ],
+          "blockedBy": [
+            "PLAN_ASSIGNMENT_COUNT:O-104"
+          ]
+        }
+      ],
+      "checkCounts": {
+        "passed": 37,
+        "failed": 1,
+        "blocked": 1
+      },
+      "blockedRuleIds": []
+    },
+    {
+      "scenarioId": "S08",
+      "dataStatus": "READY",
+      "planStatus": "VIOLATIONS",
+      "diagnostics": [],
+      "failedChecks": [
+        {
+          "ruleId": "PLAN_ASSIGNMENT_COUNT",
+          "subjectIds": [
+            "O-101"
+          ],
+          "metrics": {
+            "assignmentCount": 2
+          }
+        }
+      ],
+      "blockedChecks": [
+        {
+          "ruleId": "PLAN_READY_BY_DEPARTURE",
+          "subjectIds": [
+            "O-101"
+          ],
+          "blockedBy": [
+            "PLAN_ASSIGNMENT_COUNT:O-101"
+          ]
+        }
+      ],
+      "checkCounts": {
+        "passed": 48,
+        "failed": 1,
+        "blocked": 1
+      },
+      "blockedRuleIds": []
+    },
+    {
+      "scenarioId": "S09",
+      "dataStatus": "INVALID",
+      "planStatus": "NOT_EVALUATED",
+      "diagnostics": [
+        {
+          "code": "DATA_UNKNOWN_REFERENCE",
+          "table": "plan",
+          "recordNumber": 2,
+          "column": "worker_id"
+        }
+      ],
+      "failedChecks": [],
+      "blockedChecks": [],
+      "checkCounts": {
+        "passed": 0,
+        "failed": 0,
+        "blocked": 0
+      },
+      "blockedRuleIds": [
+        "PLAN_ASSIGNMENT_COUNT",
+        "PLAN_PICK_DURATION",
+        "PLAN_WORKER_AVAILABILITY",
+        "PLAN_WORKER_OVERLAP",
+        "PLAN_READY_BY_DEPARTURE"
+      ]
+    },
+    {
+      "scenarioId": "S10",
+      "dataStatus": "INVALID",
+      "planStatus": "NOT_EVALUATED",
+      "diagnostics": [
+        {
+          "code": "DATA_INVALID_NUMBER",
+          "table": "orders",
+          "recordNumber": 5,
+          "column": "pack_minutes"
+        }
+      ],
+      "failedChecks": [],
+      "blockedChecks": [],
+      "checkCounts": {
+        "passed": 0,
+        "failed": 0,
+        "blocked": 0
+      },
+      "blockedRuleIds": [
+        "PLAN_ASSIGNMENT_COUNT",
+        "PLAN_PICK_DURATION",
+        "PLAN_WORKER_AVAILABILITY",
+        "PLAN_WORKER_OVERLAP",
+        "PLAN_READY_BY_DEPARTURE"
+      ]
+    },
+    {
+      "scenarioId": "S11",
+      "dataStatus": "INVALID",
+      "planStatus": "NOT_EVALUATED",
+      "diagnostics": [
+        {
+          "code": "DATA_DUPLICATE_ID",
+          "table": "orders",
+          "recordNumber": 10,
+          "column": "order_id",
+          "relatedRecordNumbers": [
+            2,
+            10
+          ]
+        }
+      ],
+      "failedChecks": [],
+      "blockedChecks": [],
+      "checkCounts": {
+        "passed": 0,
+        "failed": 0,
+        "blocked": 0
+      },
+      "blockedRuleIds": [
+        "PLAN_ASSIGNMENT_COUNT",
+        "PLAN_PICK_DURATION",
+        "PLAN_WORKER_AVAILABILITY",
+        "PLAN_WORKER_OVERLAP",
+        "PLAN_READY_BY_DEPARTURE"
+      ]
+    },
+    {
+      "scenarioId": "S12",
+      "dataStatus": "INVALID",
+      "planStatus": "NOT_EVALUATED",
+      "diagnostics": [
+        {
+          "code": "DATA_UNKNOWN_REFERENCE",
+          "table": "orders",
+          "recordNumber": 5,
+          "column": "departure_id"
+        }
+      ],
+      "failedChecks": [],
+      "blockedChecks": [],
+      "checkCounts": {
+        "passed": 0,
+        "failed": 0,
+        "blocked": 0
+      },
+      "blockedRuleIds": [
+        "PLAN_ASSIGNMENT_COUNT",
+        "PLAN_PICK_DURATION",
+        "PLAN_WORKER_AVAILABILITY",
+        "PLAN_WORKER_OVERLAP",
+        "PLAN_READY_BY_DEPARTURE"
+      ]
+    },
+    {
+      "scenarioId": "S13",
+      "dataStatus": "INVALID",
+      "planStatus": "NOT_EVALUATED",
+      "diagnostics": [
+        {
+          "code": "DATA_INVALID_NUMBER",
+          "table": "orders",
+          "recordNumber": 5,
+          "column": "pack_minutes"
+        }
+      ],
+      "failedChecks": [],
+      "blockedChecks": [],
+      "checkCounts": {
+        "passed": 0,
+        "failed": 0,
+        "blocked": 0
+      },
+      "blockedRuleIds": [
+        "PLAN_ASSIGNMENT_COUNT",
+        "PLAN_PICK_DURATION",
+        "PLAN_WORKER_AVAILABILITY",
+        "PLAN_WORKER_OVERLAP",
+        "PLAN_READY_BY_DEPARTURE"
+      ]
+    },
+    {
+      "scenarioId": "S14",
+      "dataStatus": "INVALID",
+      "planStatus": "NOT_EVALUATED",
+      "diagnostics": [
+        {
+          "code": "DATA_INVALID_INTERVAL",
+          "table": "plan",
+          "recordNumber": 2,
+          "column": "end_minute"
+        }
+      ],
+      "failedChecks": [],
+      "blockedChecks": [],
+      "checkCounts": {
+        "passed": 0,
+        "failed": 0,
+        "blocked": 0
+      },
+      "blockedRuleIds": [
+        "PLAN_ASSIGNMENT_COUNT",
+        "PLAN_PICK_DURATION",
+        "PLAN_WORKER_AVAILABILITY",
+        "PLAN_WORKER_OVERLAP",
+        "PLAN_READY_BY_DEPARTURE"
+      ]
+    },
+    {
+      "scenarioId": "S15",
+      "dataStatus": "INCOMPLETE",
+      "planStatus": "NOT_EVALUATED",
+      "diagnostics": [
+        {
+          "code": "DATA_MISSING_HEADER",
+          "table": "orders",
+          "recordNumber": 1,
+          "column": "pack_minutes"
+        }
+      ],
+      "failedChecks": [],
+      "blockedChecks": [],
+      "checkCounts": {
+        "passed": 0,
+        "failed": 0,
+        "blocked": 0
+      },
+      "blockedRuleIds": [
+        "PLAN_ASSIGNMENT_COUNT",
+        "PLAN_PICK_DURATION",
+        "PLAN_WORKER_AVAILABILITY",
+        "PLAN_WORKER_OVERLAP",
+        "PLAN_READY_BY_DEPARTURE"
+      ]
+    },
+    {
+      "scenarioId": "S16",
+      "dataStatus": "READY",
+      "planStatus": "PASS",
+      "diagnostics": [],
+      "failedChecks": [],
+      "blockedChecks": [],
+      "checkCounts": {
+        "passed": 44,
+        "failed": 0,
+        "blocked": 0
+      },
+      "blockedRuleIds": []
+    },
+    {
+      "scenarioId": "S17",
+      "dataStatus": "INVALID",
+      "planStatus": "NOT_EVALUATED",
+      "diagnostics": [
+        {
+          "code": "DATA_MISSING_VALUE",
+          "table": "orders",
+          "recordNumber": 5,
+          "column": "pack_minutes"
+        },
+        {
+          "code": "DATA_UNKNOWN_REFERENCE",
+          "table": "plan",
+          "recordNumber": 2,
+          "column": "worker_id"
+        }
+      ],
+      "failedChecks": [],
+      "blockedChecks": [],
+      "checkCounts": {
+        "passed": 0,
+        "failed": 0,
+        "blocked": 0
+      },
+      "blockedRuleIds": [
+        "PLAN_ASSIGNMENT_COUNT",
+        "PLAN_PICK_DURATION",
+        "PLAN_WORKER_AVAILABILITY",
+        "PLAN_WORKER_OVERLAP",
+        "PLAN_READY_BY_DEPARTURE"
+      ]
+    }
+  ]
+}

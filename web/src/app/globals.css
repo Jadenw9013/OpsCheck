@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+/*
+ * OpsCheck visual system: a light neutral canvas, white surfaces, restrained
+ * borders, one teal primary accent, and status treatments that always carry a
+ * text label as well as a colour.
+ */
+@theme {
+  --color-canvas: #f2f4f6;
+  --color-surface: #ffffff;
+  --color-sunken: #f7f8fa;
+  --color-line: #dde2e8;
+  --color-line-strong: #c3cbd4;
+  --color-ink: #14181d;
+  --color-ink-soft: #3d454e;
+  --color-ink-muted: #656e79;
+
+  --color-accent: #0e7490;
+  --color-accent-strong: #0b5c73;
+  --color-accent-soft: #e3f2f6;
+
+  --color-ok: #146c43;
+  --color-ok-soft: #e7f4ec;
+  --color-warn: #8a5a00;
+  --color-warn-soft: #fbf1de;
+  --color-bad: #ab2b20;
+  --color-bad-soft: #fceceb;
+  --color-idle: #4d5661;
+  --color-idle-soft: #eef1f4;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", "Consolas",
+    "Liberation Mono", Menlo, monospace;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* One deliberate focus treatment everywhere. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* Numeric evidence and identifiers are always monospace. */
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The highlighted source cell after a navigation action. */
+.cell-hit {
+  background: var(--color-accent-soft);
+  box-shadow: inset 0 0 0 2px var(--color-accent);
+}
+
+.scroll-panel {
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.scroll-panel::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.scroll-panel::-webkit-scrollbar-thumb {
+  background: var(--color-line-strong);
+  border: 3px solid var(--color-surface);
+  border-radius: 999px;
+}
+
+/* Modeled packing: hatched so it never reads as a validated reservation. */
+.pack-band {
+  background-image: repeating-linear-gradient(
+    135deg,
+    var(--color-accent-soft) 0px,
+    var(--color-accent-soft) 4px,
+    var(--color-surface) 4px,
+    var(--color-surface) 7px
+  );
+  border: 1px solid var(--color-accent);
+  opacity: 0.95;
+}
+
+/* The overrun between departure and modeled readiness. */
+.overrun-band {
+  background-image: repeating-linear-gradient(
+    135deg,
+    var(--color-bad) 0px,
+    var(--color-bad) 3px,
+    #f6b4ae 3px,
+    #f6b4ae 6px
+  );
+}
+
+/* Respect a reduced-motion preference: no transitions, no smooth scrolling. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Narrow screens cannot fit every tick label; show alternate labels instead
+   of letting them collide. The gridlines still mark every tick. */
+@media (max-width: 640px) {
+  .axis-tick:nth-child(even) {
+    display: none;
+  }
+}
