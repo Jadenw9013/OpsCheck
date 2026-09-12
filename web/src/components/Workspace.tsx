@@ -1,18 +1,23 @@
 'use client';
 
-import type { DataStatus, SourceRef } from '@/domain/types';
+import { TABLE_ORDER } from '@/domain/constants';
+import type { DataOrigin, DataStatus, SourceRef } from '@/domain/types';
 import { findFinding } from '@/features/viewModel';
 import { useOpsCheck } from '@/features/useOpsCheck';
-import { BASELINE_SCENARIO_ID, DEMO_SCENARIO_IDS, scenarioMeta } from '@/fixtures/loadScenario';
+import { downloadReportJson } from '@/features/exportReport';
+import { IMPORT_LIMITS } from '@/features/importFile';
+import { BASELINE_SCENARIO_ID, scenarioList, scenarioMeta } from '@/fixtures/loadScenario';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useBriefing } from '@/features/useBriefing';
 import { AiReportPanel, PlanStrip } from './AiReportPanel';
 import { EvidencePanel } from './EvidencePanel';
+import { FileSlot } from './FileSlot';
 import { FindingsList } from './FindingsList';
 import { OrderTimeline } from './OrderTimeline';
 import { PlanTable } from './PlanTable';
+import { RegressionPanel } from './RegressionPanel';
 import { SourceViewer } from './SourceViewer';
-import { ChevronGlyph, MissingGlyph } from './ui';
+import { ChevronGlyph, Disclosure, MissingGlyph } from './ui';
 
 /**
  * What each scenario CHANGES about the inputs.
@@ -27,6 +32,21 @@ const SCENARIO_INPUT_SUMMARY: Record<string, string> = {
   S00: 'Eight orders across two departures, D-1 at 10:00 and D-2 at 11:00, with two pickers.',
   S01: 'Baseline inputs, with departure D-1 moved earlier to 09:05.',
   S02: 'Baseline inputs, with the packing duration for order O-104 left blank.',
+  S03: 'Baseline inputs, with assignment A-3 moved to 08:15–08:30 on worker W-1.',
+  S04: 'Baseline inputs, with worker W-1 available from 08:10 instead of 08:00.',
+  S05: 'Baseline inputs, with departure D-1 moved to 09:15.',
+  S06: 'Baseline inputs, with assignment A-1 shortened to 08:00–08:19.',
+  S07: 'Baseline inputs, with assignment A-4 removed, so order O-104 has no assignment.',
+  S08: 'Baseline inputs, with an extra assignment A-9 also covering order O-101 at 10:00–10:20.',
+  S09: 'Baseline inputs, with assignment A-1 pointing at worker W-9, which the workers export does not declare.',
+  S10: 'Baseline inputs, with the packing duration for order O-104 set to -1.',
+  S11: 'Baseline inputs, with a second order record also using the identifier O-101.',
+  S12: 'Baseline inputs, with order O-104 pointing at departure D-9, which the departures export does not declare.',
+  S13: 'Baseline inputs, with the packing duration for order O-104 written as “soon”.',
+  S14: 'Baseline inputs, with assignment A-1 starting at 08:30 and ending at 08:20.',
+  S15: 'Baseline inputs, with the pack_minutes column absent from the orders export.',
+  S16: 'Baseline values exported under the Warehouse B column names for orders and departures.',
+  S17: 'Baseline inputs, with the packing duration for O-104 left blank and assignment A-1 pointing at worker W-9.',
 };
 
 /**
@@ -64,7 +84,9 @@ export function Workspace() {
    */
   const runChecks = useCallback(() => {
     c.run();
-    if (briefing.available && briefing.includeAi) {
+    // Never for a customized bundle: the request names a bundled scenario the
+    // server re-evaluates, so user-supplied files have nothing to authorize.
+    if (briefing.available && briefing.includeAi && !c.customized) {
       const nextKey = c.scenarioId + ':run:' + (c.runSerial + 1);
       userChoseTab.current = false;
       setTab('ai');
@@ -86,6 +108,17 @@ export function Workspace() {
     [c],
   );
 
+  /**
+   * Export the current result. `c.report` is null unless the report still
+   * matches these exact inputs, so a stale run has nothing to download.
+   */
+  const exportReport = useCallback(() => {
+    if (c.report === null) return;
+    downloadReportJson(c.bundle, c.report, {
+      scenarioId: c.customized ? null : c.scenarioId,
+    });
+  }, [c]);
+
   // A new snapshot resets tab intent; nothing here starts a request.
   useEffect(() => {
     userChoseTab.current = false;
@@ -94,15 +127,21 @@ export function Workspace() {
   return (
     <div className="mx-auto w-full max-w-[90rem] px-4 py-6 sm:px-8 sm:py-8">
       <div className="flex flex-col gap-8">
-        <Header />
+        <Header origin={c.bundle.origin} />
 
         <ControlBar
           scenarioId={c.scenarioId}
+          customized={c.customized}
+          readingFile={c.readingFile}
           onSelectScenario={c.selectScenario}
           onRun={runChecks}
           onReset={c.resetBaseline}
+          onExport={exportReport}
+          canExport={c.report !== null}
           briefing={briefing}
         />
+
+        <ImportSection controller={c} />
 
         {c.evaluationError !== null ? (
           <p
@@ -162,6 +201,8 @@ export function Workspace() {
 
           <SourceSection controller={c} />
 
+          <RegressionPanel />
+
           <Assumptions />
         </div>
       </div>
@@ -170,37 +211,6 @@ export function Workspace() {
         {c.announcement}
       </p>
     </div>
-  );
-}
-
-/**
- * One reusable native disclosure for the secondary inspection tools.
- *
- * `<details>` gives correct keyboard and screen-reader behaviour without a
- * hand-rolled widget, and the summary row is a comfortable target.
- */
-function Disclosure({
-  summary,
-  hint,
-  children,
-  open = false,
-}: {
-  summary: string;
-  hint?: string;
-  children: React.ReactNode;
-  open?: boolean;
-}) {
-  return (
-    <details open={open} className="ops-panel group">
-      <summary className="flex min-h-[3.25rem] cursor-pointer list-none items-center gap-3 px-6 py-4">
-        <span className="text-ink-muted transition-transform group-open:rotate-90">
-          <ChevronGlyph open={false} className="h-4 w-4" />
-        </span>
-        <span className="ops-panel-title text-ink">{summary}</span>
-        {hint ? <span className="ops-meta hidden text-ink-muted sm:inline">{hint}</span> : null}
-      </summary>
-      <div className="border-t border-line">{children}</div>
-    </details>
   );
 }
 
@@ -219,7 +229,10 @@ function ResultSummary({ controller }: { controller: ReturnType<typeof useOpsChe
   let tone: 'ok' | 'warn' | 'bad' | 'idle' = 'idle';
   let supporting: string | null = null;
 
-  if (c.stale) {
+  if (c.readingFile) {
+    outcome = 'Reading a file.';
+    supporting = 'No result is shown while the inputs are still changing.';
+  } else if (c.stale) {
     outcome = 'Inputs changed. Run checks again.';
     tone = 'warn';
     supporting = 'The previous result no longer describes these inputs.';
@@ -304,6 +317,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 }
 
 function dataStatusText(c: ReturnType<typeof useOpsCheck>): string {
+  if (c.readingFile) return 'Reading a file';
   if (c.stale) return 'Changed since last run';
   if (!c.hasRun || c.report === null) return 'Not checked yet';
   const label: Record<DataStatus, string> = {
@@ -413,7 +427,9 @@ function Inspector({
   );
 }
 
-function Header() {
+function Header({ origin }: { origin: DataOrigin }) {
+  const supplied = origin === 'USER_SUPPLIED_UNVERIFIED';
+
   return (
     <header className="flex flex-wrap items-start justify-between gap-x-8 gap-y-3">
       <div className="min-w-0">
@@ -421,13 +437,21 @@ function Header() {
         <p className="ops-body mt-1 text-ink-soft">Check the plan. Trace the problem.</p>
       </div>
       {/*
-        Synthetic data is a neutral provenance label, not a warning: an amber
-        treatment here would read as an error state the app is not in.
+        Provenance, stated as provenance. Synthetic data is a neutral label, not
+        a warning; user-supplied data is labelled unverified because nothing in
+        this prototype has checked where it came from.
       */}
       <div className="flex flex-col items-start gap-1 sm:items-end">
-        <span className="ops-meta inline-flex items-center gap-2 rounded-full border border-line bg-sunken px-3 py-1 font-medium text-ink-soft">
+        <span
+          className={
+            'ops-meta inline-flex items-center gap-2 rounded-full border px-3 py-1 font-medium ' +
+            (supplied
+              ? 'border-warn/30 bg-warn-soft text-warn'
+              : 'border-line bg-sunken text-ink-soft')
+          }
+        >
           <MissingGlyph className="h-4 w-4" />
-          Synthetic data
+          {supplied ? 'User-supplied data, unverified' : 'Synthetic data'}
         </span>
         <span className="ops-meta text-ink-muted">
           Independent prototype · No live warehouse connection
@@ -437,17 +461,75 @@ function Header() {
   );
 }
 
+/**
+ * Import slots for the four tables.
+ *
+ * Collapsed by default: the bundled cases are the demo, and this is the proof
+ * that the same pipeline accepts a real export. Files are read in the browser
+ * and never uploaded anywhere.
+ */
+function ImportSection({ controller }: { controller: ReturnType<typeof useOpsCheck> }) {
+  const c = controller;
+
+  return (
+    <Disclosure
+      summary="Use your own CSV exports"
+      hint="Four slots, one explicit mapping profile each."
+    >
+      <div className="flex flex-col gap-4 px-6 py-5">
+        <p className="ops-body max-w-[75ch] text-ink-soft">
+          Each file is read in this browser tab and evaluated by the same engine the bundled cases
+          use. Nothing is uploaded, stored, or sent to a server. Replacing or removing any file
+          marks the whole bundle user-supplied and unverified until you reload a bundled case with
+          Reset baseline.
+        </p>
+        <p className="ops-meta max-w-[75ch] text-ink-muted">
+          The mapping profile is always your explicit choice; it is never guessed from a filename.
+          Per file: at most {IMPORT_LIMITS.maxBytes} bytes, {IMPORT_LIMITS.maxRecords} data
+          records, and {IMPORT_LIMITS.maxColumns} columns. An over-limit file is refused, never
+          truncated.
+        </p>
+
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+          {TABLE_ORDER.map((table) => (
+            <FileSlot
+              key={table}
+              table={table}
+              file={c.bundle.files[table]}
+              profile={c.profiles[table]}
+              preview={c.preview[table]}
+              reading={c.reading[table]}
+              error={c.fileErrors[table]}
+              onLoad={(file) => c.loadFile(table, file)}
+              onClear={() => c.clearFile(table)}
+              onProfileChange={(profile) => c.setProfile(table, profile)}
+            />
+          ))}
+        </div>
+      </div>
+    </Disclosure>
+  );
+}
+
 function ControlBar({
   scenarioId,
+  customized,
+  readingFile,
   onSelectScenario,
   onRun,
   onReset,
+  onExport,
+  canExport,
   briefing,
 }: {
   scenarioId: string;
+  customized: boolean;
+  readingFile: boolean;
   onSelectScenario: (id: string) => void;
   onRun: () => void;
   onReset: () => void;
+  onExport: () => void;
+  canExport: boolean;
   briefing: ReturnType<typeof useBriefing>;
 }) {
   const meta = scenarioMeta(scenarioId);
@@ -455,50 +537,79 @@ function ControlBar({
   return (
     <section aria-label="Scenario and checks" className="ops-panel px-6 py-5">
       <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
-        <div
-          role="group"
-          aria-label="Scenario"
-          className="flex flex-wrap gap-2"
-        >
-          {DEMO_SCENARIO_IDS.map((id) => {
-            const item = scenarioMeta(id);
-            const active = id === scenarioId;
-            return (
-              <button
-                key={id}
-                type="button"
-                aria-pressed={active}
-                onClick={() => onSelectScenario(id)}
-                className={'ops-control' + (active ? ' ops-control--selected' : '')}
-              >
-                {item.title}
-                <span className="mono ops-meta font-normal text-ink-muted">{id}</span>
-              </button>
-            );
-          })}
+        {/*
+          All eighteen frozen cases, read straight from the fixture pack. A
+          native select keeps the full set keyboard reachable at one tab stop
+          and cannot drift out of step with scenarios.json.
+        */}
+        <div className="flex min-w-0 flex-wrap items-center gap-3">
+          <label htmlFor="scenario-select" className="ops-body font-medium text-ink">
+            Scenario
+          </label>
+          <select
+            id="scenario-select"
+            className="ops-select min-w-0 max-w-full sm:min-w-[22rem]"
+            value={scenarioId}
+            onChange={(event) => onSelectScenario(event.target.value)}
+          >
+            {scenarioList.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.id} — {item.title}
+              </option>
+            ))}
+          </select>
+          <span className="ops-meta text-ink-muted">
+            {scenarioList.length} frozen regression cases
+          </span>
         </div>
 
         <div className="ml-auto flex flex-wrap items-center gap-3">
-          <AiSwitch briefing={briefing} />
+          <AiSwitch briefing={briefing} customized={customized} />
           <button
             type="button"
             onClick={onReset}
-            disabled={scenarioId === BASELINE_SCENARIO_ID}
+            disabled={scenarioId === BASELINE_SCENARIO_ID && !customized}
+            title="Reload the untouched S00 baseline files."
             className="ops-control"
           >
-            Reset
+            Reset baseline
           </button>
-          <button type="button" onClick={onRun} className="ops-control ops-control--primary">
+          <button
+            type="button"
+            onClick={onExport}
+            disabled={!canExport}
+            title={
+              canExport
+                ? 'Save this result as JSON. The CSV text itself is not included.'
+                : 'Available once checks have been run against these exact inputs.'
+            }
+            className="ops-control"
+          >
+            Download report
+          </button>
+          <button
+            type="button"
+            onClick={onRun}
+            disabled={readingFile}
+            className="ops-control ops-control--primary"
+          >
             Run checks
           </button>
         </div>
       </div>
 
       <p className="ops-body mt-4 max-w-[65ch] text-ink-soft">
-        {SCENARIO_INPUT_SUMMARY[scenarioId] ?? meta.description}
+        {customized ? (
+          <>
+            Your own files, starting from {scenarioId}. The bundled description no longer applies;
+            Reset baseline reloads the untouched S00 fixture.
+          </>
+        ) : (
+          SCENARIO_INPUT_SUMMARY[scenarioId] ?? meta.description
+        )}
       </p>
 
-      {briefing.available && briefing.includeAi ? (
+      {briefing.available && briefing.includeAi && !customized ? (
         <p className="ops-meta mt-2 text-warn">
           With AI on, Run checks sends this synthetic scenario’s evidence to Anthropic and may
           incur API charges.
@@ -509,8 +620,18 @@ function ControlBar({
 }
 
 /** Compact, accessible switch. Disabled with a reason when unconfigured. */
-function AiSwitch({ briefing }: { briefing: ReturnType<typeof useBriefing> }) {
-  const disabled = !briefing.available;
+function AiSwitch({
+  briefing,
+  customized,
+}: {
+  briefing: ReturnType<typeof useBriefing>;
+  customized: boolean;
+}) {
+  // The report is generated from a bundled case the server re-evaluates itself;
+  // user-supplied CSV content is never sent anywhere. With your own files
+  // loaded there is nothing the server could reproduce, so the switch is off
+  // rather than producing a request that could only be withheld.
+  const disabled = !briefing.available || customized;
   const on = briefing.includeAi && !disabled;
 
   return (
@@ -521,9 +642,11 @@ function AiSwitch({ briefing }: { briefing: ReturnType<typeof useBriefing> }) {
       aria-label="Include AI report"
       disabled={disabled}
       title={
-        disabled
-          ? 'Set OPSCHECK_AI_ENABLED and ANTHROPIC_API_KEY in web/.env.local, then restart.'
-          : 'One Run checks click sends one request to Anthropic.'
+        customized
+          ? 'Available for the bundled cases only. Your own CSV content is never sent anywhere.'
+          : disabled
+            ? 'Set OPSCHECK_AI_ENABLED and ANTHROPIC_API_KEY in web/.env.local, then restart.'
+            : 'One Run checks click sends one request to Anthropic.'
       }
       onClick={() => briefing.setIncludeAi(!on)}
       className={'ops-control' + (on ? ' ops-control--selected' : '')}

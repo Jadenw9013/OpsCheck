@@ -1,4 +1,5 @@
 import { expect, test, type Page, type Route } from '@playwright/test';
+import { BASELINE, EARLIER_DEPARTURE, MISSING_PACK, selectScenario } from './scenario';
 
 /**
  * Browser checks for the AI report, with the ROUTE RESPONSE mocked.
@@ -187,7 +188,7 @@ test('one Run checks click with AI on sends exactly one request', async ({ page 
     'true',
   );
   expect(posts).toBe(0);
-  await page.getByRole('button', { name: /^Earlier departure/ }).click();
+  await selectScenario(page, EARLIER_DEPARTURE);
   expect(posts).toBe(0);
 
   await page.getByRole('button', { name: RUN }).click();
@@ -205,7 +206,7 @@ test('deterministic results update before the AI response arrives', async ({ pag
   await mockPost(page, verifiedPayload, { delayMs: 1200 });
   await page.reload();
 
-  await page.getByRole('button', { name: /^Earlier departure/ }).click();
+  await selectScenario(page, EARLIER_DEPARTURE);
   await page.getByRole('button', { name: RUN }).click();
 
   // Engine output is present immediately, while the report is still generating.
@@ -224,7 +225,7 @@ test('the report shows real prose, scoped labels, and a working citation', async
   await mockPost(page, verifiedPayload);
   await page.reload();
 
-  await page.getByRole('button', { name: /^Earlier departure/ }).click();
+  await selectScenario(page, EARLIER_DEPARTURE);
   await page.getByRole('button', { name: RUN }).click();
 
   const inspector = panel(page);
@@ -334,7 +335,7 @@ test('missing data is reported without a readiness estimate or approval', async 
   }));
   await page.reload();
 
-  await page.getByRole('button', { name: /^Missing packing duration/ }).click();
+  await selectScenario(page, MISSING_PACK);
   await page.getByRole('button', { name: RUN }).click();
 
   const inspector = panel(page);
@@ -375,7 +376,7 @@ test('a withheld narrative names the failed check and publishes no prose', async
   });
   await page.reload();
 
-  await page.getByRole('button', { name: /^Earlier departure/ }).click();
+  await selectScenario(page, EARLIER_DEPARTURE);
   await page.getByRole('button', { name: RUN }).click();
 
   const inspector = panel(page);
@@ -415,7 +416,7 @@ test('a late response cannot steal the tab after the user chooses Evidence', asy
   await mockPost(page, verifiedPayload, { delayMs: 1500 });
   await page.reload();
 
-  await page.getByRole('button', { name: /^Earlier departure/ }).click();
+  await selectScenario(page, EARLIER_DEPARTURE);
   await page.getByRole('button', { name: RUN }).click();
   await expect(aiTab(page)).toHaveAttribute('aria-selected', 'true');
 
@@ -433,15 +434,15 @@ test('a scenario change invalidates the report and it cannot reappear', async ({
   await mockPost(page, verifiedPayload);
   await page.reload();
 
-  await page.getByRole('button', { name: /^Earlier departure/ }).click();
+  await selectScenario(page, EARLIER_DEPARTURE);
   await page.getByRole('button', { name: RUN }).click();
   await expect(panel(page).getByText(OVERVIEW)).toBeVisible();
 
   // S01 -> S00 -> S01 reaches an identical fingerprint again.
-  await page.getByRole('button', { name: /^Baseline/ }).click();
+  await selectScenario(page, BASELINE);
   await expect(panel(page).getByText(OVERVIEW)).toHaveCount(0);
 
-  await page.getByRole('button', { name: /^Earlier departure/ }).click();
+  await selectScenario(page, EARLIER_DEPARTURE);
   await expect(panel(page).getByText(OVERVIEW)).toHaveCount(0);
 });
 
@@ -450,7 +451,7 @@ test('re-running the same scenario invalidates the previous report', async ({ pa
   await mockPost(page, verifiedPayload, { delayMs: 400 });
   await page.reload();
 
-  await page.getByRole('button', { name: /^Earlier departure/ }).click();
+  await selectScenario(page, EARLIER_DEPARTURE);
   await page.getByRole('button', { name: RUN }).click();
   await expect(panel(page).getByText(OVERVIEW)).toBeVisible();
 
@@ -464,7 +465,7 @@ test('the AI report tab does not disturb the timeline or evidence flow', async (
   await mockPost(page, verifiedPayload);
   await page.reload();
 
-  await page.getByRole('button', { name: /^Earlier departure/ }).click();
+  await selectScenario(page, EARLIER_DEPARTURE);
   await page.getByRole('button', { name: RUN }).click();
 
   // Selecting a timeline row is an explicit request for Evidence.
@@ -487,7 +488,7 @@ test('the report renders at narrow width without page overflow', async ({ page }
   await mockPost(page, verifiedPayload);
   await page.reload();
 
-  await page.getByRole('button', { name: /^Earlier departure/ }).click();
+  await selectScenario(page, EARLIER_DEPARTURE);
   await page.getByRole('button', { name: RUN }).click();
   await expect(panel(page).getByText(OVERVIEW)).toBeVisible();
 

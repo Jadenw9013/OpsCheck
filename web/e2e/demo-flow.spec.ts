@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { EARLIER_DEPARTURE, MISSING_PACK, selectScenario } from './scenario';
 
 /**
  * The scoped demo walkthrough, exercised against the production build:
@@ -11,15 +12,7 @@ import { expect, test, type Page } from '@playwright/test';
  */
 
 const RUN = 'Run checks';
-const RESET = 'Reset';
-
-function scenarioButton(page: Page, name: RegExp) {
-  return page.getByRole('button', { name });
-}
-
-const BASELINE = /^Baseline/;
-const EARLIER = /^Earlier departure/;
-const MISSING = /^Missing packing duration/;
+const RESET = 'Reset baseline';
 
 /** The current plan outcome now has its own region above the workspace. */
 function result(page: Page) {
@@ -94,7 +87,7 @@ test('baseline reports a pass only after checks actually run', async ({ page }) 
 test('earlier departure shows the ten-minute miss and navigates to a real source cell', async ({
   page,
 }) => {
-  await scenarioButton(page, EARLIER).click();
+  await selectScenario(page, EARLIER_DEPARTURE);
   await page.getByRole('button', { name: RUN }).click();
 
   await expect(result(page).getByText('1 modeled violation')).toBeVisible();
@@ -145,7 +138,7 @@ test('earlier departure shows the ten-minute miss and navigates to a real source
 });
 
 test('the compact source chip in the calculation opens its own cell', async ({ page }) => {
-  await scenarioButton(page, EARLIER).click();
+  await selectScenario(page, EARLIER_DEPARTURE);
   await page.getByRole('button', { name: RUN }).click();
   await orderRow(page, 'O-104').click();
 
@@ -164,7 +157,7 @@ test('the compact source chip in the calculation opens its own cell', async ({ p
 });
 
 test('selecting a finding highlights the matching schedule row', async ({ page }) => {
-  await scenarioButton(page, EARLIER).click();
+  await selectScenario(page, EARLIER_DEPARTURE);
   await page.getByRole('button', { name: RUN }).click();
 
   // Deselect by choosing a different order, then select via the findings list.
@@ -180,7 +173,7 @@ test('selecting a finding highlights the matching schedule row', async ({ page }
 });
 
 test('missing packing duration blocks evaluation instead of assuming zero', async ({ page }) => {
-  await scenarioButton(page, MISSING).click();
+  await selectScenario(page, MISSING_PACK);
   await page.getByRole('button', { name: RUN }).click();
 
   await expect(result(page).getByText('Cannot evaluate this plan.')).toBeVisible();
@@ -226,7 +219,7 @@ test('changing the scenario invalidates the previous report and its overlays', a
   await expect(schedule(page).getByText('on time').first()).toBeVisible();
 
   // Switching inputs must drop the result and every derived overlay with it.
-  await scenarioButton(page, EARLIER).click();
+  await selectScenario(page, EARLIER_DEPARTURE);
   await expect(result(page).getByText('Passed implemented checks.')).toHaveCount(0);
   await expect(result(page).getByText('Inputs changed. Run checks again.')).toBeVisible();
   await expect(result(page).getByText('Not evaluated')).toBeVisible();
@@ -237,7 +230,7 @@ test('changing the scenario invalidates the previous report and its overlays', a
 });
 
 test('reset returns to a fresh baseline with no carried-over result', async ({ page }) => {
-  await scenarioButton(page, EARLIER).click();
+  await selectScenario(page, EARLIER_DEPARTURE);
   await page.getByRole('button', { name: RUN }).click();
   await expect(result(page).getByText('1 modeled violation')).toBeVisible();
 
@@ -260,12 +253,12 @@ test('controls, status, schedule, and the calculation share a laptop viewport', 
   page,
 }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
-  await scenarioButton(page, EARLIER).click();
+  await selectScenario(page, EARLIER_DEPARTURE);
   await page.getByRole('button', { name: RUN }).click();
 
   for (const locator of [
     page.getByRole('button', { name: RUN }),
-    scenarioButton(page, BASELINE),
+    page.getByLabel('Scenario', { exact: true }),
     result(page).getByText('1 modeled violation'),
     result(page).getByText('43 passed / 1 failed / 0 blocked'),
   ]) {
@@ -277,7 +270,7 @@ test('controls, status, schedule, and the calculation share a laptop viewport', 
 
 test('a narrow viewport stacks without overflowing the page horizontally', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await scenarioButton(page, EARLIER).click();
+  await selectScenario(page, EARLIER_DEPARTURE);
   await page.getByRole('button', { name: RUN }).click();
 
   const overflow = await page.evaluate(

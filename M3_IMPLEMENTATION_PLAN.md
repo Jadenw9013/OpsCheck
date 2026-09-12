@@ -1,6 +1,10 @@
 ﻿# M3 Implementation Plan — CSV Upload, Profile Switcher, Regression Dashboard, JSON Export
 
-**Status:** Not started. Engine (M1) and demo UI (M2) are complete and verified.  
+**Status:** IMPLEMENTED 2026-09-11. All five features are in the app and verified; see
+`VERIFICATION.md` (M3 pass) and `HANDOFF.md`. Engine (M1) and demo UI (M2) were already complete and
+were not modified. Two documented deviations from the text below: `DEMO_SCENARIO_IDS` was removed
+rather than expanded, and `runRegressionSuite` returns the results array with a separate
+`summarizeRegression` helper for the aggregate counts.  
 **Prerequisite reading before touching any file:** `AGENTS.md`, `docs/02_ARCHITECTURE_AND_SETUP.md`, `docs/03_DATA_CONTRACTS.md`, `docs/04_VALIDATION_ENGINE.md`, `HANDOFF.md`.
 
 ---

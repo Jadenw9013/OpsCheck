@@ -5,11 +5,14 @@ This file starts as a plan. It is not evidence that code exists.
 ## Execution boundary
 - Authorization: **FAST-TRACK DEMO, recorded 2026-09-10**. The user supplied an updated delivery instruction that supersedes M0–M4 sequencing and the full-delivery requirement for this session only. Data contracts, validation rules, frozen fixtures, and truthfulness requirements are unchanged.
 - Authorized this session: local dependency installation, application development, tests, local browser verification. NOT authorized: deploy, push, paid services, data upload, global settings changes, unrelated file edits.
-- Active work: fast-track demo slice (an M2-shaped scenario/evidence workflow), NOT milestone completion.
-- App status: **fast-track demo BUILT and VERIFIED** on 2026-09-10. See `VERIFICATION.md`.
-- Last verified milestone: NONE. M0–M4 remain open; this session does not close them.
+- Active work: M3 delivered on 2026-09-11 (CSV import, profile switcher, all 18 scenarios,
+  regression dashboard, JSON export) under the user's M3 instruction of that date.
+- App status: **BUILT and VERIFIED** on 2026-09-11. See `VERIFICATION.md`.
+- Last verified milestone: NONE closed. M0–M4 remain open; M3's own boxes are now checked, but
+  closure still depends on the M4 verification items below.
 - Genuine blocker: NONE.
-- Next task: widen the oracle suite from 3 cases to all 18 (see `HANDOFF.md`).
+- Next task: the remaining M4 items — keyboard-only traversal, an assistive-technology pass, and the
+  owner demo rehearsal (see `HANDOFF.md`).
 - Later on 2026-09-10 the user authorized a bounded visual upgrade, including the order timeline
   that earlier scope prohibited. Correctness requirements and all other scope boundaries stand.
 - Later still on 2026-09-10 the user authorized a bounded, optional server-side Anthropic briefing
@@ -46,9 +49,9 @@ slice that cuts across M0–M2; it does not close any milestone.
 |---|---|---|---|
 | M0 | Scaffold, scripts, seed copies, smoke test | SUBSTANTIALLY DONE, not closed | App scaffolded in `web/`; scripts defined; seed copies sha256-identical; typecheck/lint/test/build pass |
 | M1 | CSV ingestion, data gate, five plan rules, 18-case parity | SUBSTANTIALLY DONE, not closed | Engine, data gate, and R1–R5 implemented; **all 18 frozen fixtures now asserted and passing** |
-| M2 | Useful built-in-scenario UI and evidence navigation | SUBSTANTIALLY DONE, not closed | One-screen workflow, three demo cases, separate data/plan status, working source navigation, stale/not-run states, 8 Playwright checks |
-| M3 | Real local CSV replacement, explicit profiles, regression runner, JSON report | DEFERRED | Not started, by agreement |
-| M4 | Production/browser verification, limitations, owner demo | PARTIAL | Build + Chromium checks + screenshots done; keyboard/assistive passes and owner rehearsal NOT RUN |
+| M2 | Useful built-in-scenario UI and evidence navigation | SUBSTANTIALLY DONE, not closed | One-screen workflow, all 18 cases selectable, separate data/plan status, working source navigation, stale/not-run states, Playwright checks |
+| M3 | Real local CSV replacement, explicit profiles, regression runner, JSON report | IMPLEMENTED 2026-09-11, not closed | Four import slots with per-slot profiles and mapping preview, in-app 18-case sweep, current-only JSON export; 159 Vitest tests and 44 Playwright checks pass |
+| M4 | Production/browser verification, limitations, owner demo | PARTIAL | Build + 44 Chromium checks + screenshots done; keyboard/assistive passes and owner rehearsal NOT RUN |
 
 ## M0
 - [x] Record actual execution authorization.
@@ -71,7 +74,7 @@ slice that cuts across M0–M2; it does not close any milestone.
 
 ## M2
 - [x] Build one-screen baseline workflow without arbitrary KPI filler.
-- [ ] Add all built-in scenarios; make S00/S01/S02 easy to reach. **PARTIAL: S00/S01/S02 are in the toolbar; the other 15 have no UI.**
+- [x] Add all built-in scenarios; make S00/S01/S02 easy to reach. All 18 are in one labelled selector read straight from the fixture pack, with S00 the default.
 - [x] Render data readiness separately from plan outcome.
 - [x] Show engine-computed metrics and source-linked evidence.
 - [x] Implement source table navigation and visible current-record highlighting.
@@ -80,13 +83,22 @@ slice that cuts across M0–M2; it does not close any milestone.
 - [x] Record emergency-demo checkpoint status truthfully.
 
 ## M3
-- [ ] Add actual local file selectors for four table slots.
-- [ ] Add explicit supported profiles and a mapping preview.
-- [ ] Guard file size/read failures and asynchronous replacement races.
-- [ ] Make all edits mark the report stale; reset returns to a fresh cloned baseline.
-- [ ] Add real run-all regression evaluation with actual-versus-expected comparison.
-- [ ] Add current-report JSON download; never export stale results as current.
-- [ ] Verify the Warehouse B and missing-pack upload examples.
+- [x] Add actual local file selectors for four table slots. (`src/components/FileSlot.tsx`)
+- [x] Add explicit supported profiles and a mapping preview. Options come from
+      `supportedProfiles(table)` and rows from `getMapping(table, profile)`; nothing is inferred
+      from a filename.
+- [x] Guard file size/read failures and asynchronous replacement races. Size is checked against
+      `File.size` before the read; record/column caps run through `parseCsv` before the engine sees
+      the text; one request token per slot drops a read that a newer choice or a reset superseded.
+- [x] Make all edits mark the report stale; reset returns to a fresh cloned baseline. Import,
+      removal, and profile changes all bump the input revision; reset reloads S00 and restores
+      `SYNTHETIC`.
+- [x] Add real run-all regression evaluation with actual-versus-expected comparison.
+      (`src/features/regression.ts`, user-triggered, bundled fixtures only.)
+- [x] Add current-report JSON download; never export stale results as current. The button is
+      disabled unless `report !== null`, and the CSV text is excluded from the payload.
+- [x] Verify the Warehouse B and missing-pack upload examples. Both are covered by
+      `e2e/import-and-regression.spec.ts`; the standard examples reproduce the bundled S00 result.
 
 ## M4
 - [ ] Rerun frozen oracle suite and seed-copy equality checks.
@@ -215,3 +227,23 @@ No fixture or expected outcome was edited. The operand-unit field is invisible t
 and the S00/S01/S02 oracle comparison still matches byte-for-byte expectations.
 
 Next step: widen `DEMO_CASES` in `web/tests/fixture-oracles.test.ts` to all 18 frozen cases.
+
+### 2026-09-11 - M3: CSV import, profile switcher, regression dashboard, JSON export
+Milestone: M3. New files: `src/components/{FileSlot,RegressionPanel}.tsx`,
+`src/features/{importFile,regression,exportReport}.ts`,
+`tests/{import-limits,regression-runner,export-report}.test.ts`,
+`e2e/{import-and-regression.spec.ts,scenario.ts}`. Changed: `src/features/useOpsCheck.ts`
+(import/profile actions, per-slot read tokens, reading state), `src/components/Workspace.tsx`
+(import section, regression panel, export button, 18-case selector), `src/components/ui.tsx`
+(`Disclosure` moved here for reuse), `src/app/globals.css`, `src/fixtures/loadScenario.ts`
+(full list exported; `DEMO_SCENARIO_IDS` removed), the three existing e2e specs (shared scenario
+selector helper).
+
+Commands run in `web/`: `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`,
+`npm run test:e2e`. Results: typecheck and lint clean, 159 Vitest tests in 9 files passed,
+production build succeeded with no API key, 44 Playwright Chromium checks passed.
+`src/domain/` was not modified; `scenarios.json` and `expected-results.json` remain byte-identical
+to `seed-data/`. No live provider call was made.
+
+Next step: the remaining M4 items - keyboard-only traversal, an assistive-technology pass, and the
+owner demo rehearsal.

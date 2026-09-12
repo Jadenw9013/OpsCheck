@@ -1,13 +1,14 @@
 # Handoff — resume from repository evidence
 
-## Current state, 2026-09-10
-- Application: **BUILT AND RUNNING** as a fast-track demo slice in `web/`.
-- Active milestone: none closed. M0–M4 remain open by agreement; this session delivered an
-  M2-shaped scenario/evidence workflow only.
+## Current state, 2026-09-11
+- Application: **BUILT** in `web/`, with the M3 import, regression, and export surfaces in place.
+- Active milestone: none closed. M0–M4 remain open; the 2026-09-11 session implemented all of M3
+  (CSV import, profile switcher, all 18 scenarios, regression dashboard, JSON export).
 - Completed and verified milestones: **NONE**. Do not mark M0–M4 complete from this session.
-- Authorization used: the fast-track delivery instruction of 2026-09-10 (local dependency install,
-  app development, tests, local browser verification). No deploy, push, paid service, upload,
-  global settings change, or unrelated file edit occurred.
+- Authorization used: the fast-track delivery instruction of 2026-09-10, then the M3 implementation
+  instruction of 2026-09-11 (implement the four M3 features and run the gates). No deploy, push,
+  paid service, upload, global settings change, or unrelated file edit occurred. Nothing is
+  committed: the M3 work is present in the working tree only.
 - Blocker: **NONE**.
 
 ## How to start the demo
@@ -21,9 +22,57 @@ cd C:\Dev\haladir\web
 npm run build
 npm run start -- --hostname 127.0.0.1 --port 3100    # http://127.0.0.1:3100
 ```
-At the end of this session a production server was left running on
-**http://127.0.0.1:3100** (verified HTTP 200). It is a foreground-detached process, not a service:
-it will not survive a reboot, and a new session must assume it is gone and start its own.
+**No server is running now.** The 2026-09-11 session's browser checks started their own production
+server and shut it down with the run; port 3100 was verified unreachable afterwards. Start your own
+with the commands above.
+
+## M3, 2026-09-11 (CSV import, profile switcher, regression dashboard, JSON export)
+Implemented against `M3_IMPLEMENTATION_PLAN.md`. The engine was not touched: `src/domain/` has no
+changes, and `scenarios.json` and `expected-results.json` remain byte-identical to `seed-data/`.
+
+New: `src/components/{FileSlot,RegressionPanel}.tsx`,
+`src/features/{importFile,regression,exportReport}.ts`,
+`tests/{import-limits,regression-runner,export-report}.test.ts`,
+`e2e/{import-and-regression.spec.ts,scenario.ts}`.
+Changed: `src/features/useOpsCheck.ts`, `src/components/{Workspace,ui}.tsx`,
+`src/app/globals.css`, `src/fixtures/loadScenario.ts`, and the three existing e2e specs.
+
+What it does:
+- **All 18 cases** in one labelled selector read straight from the fixture pack, S00 default.
+  `DEMO_SCENARIO_IDS` is gone, so no hardcoded subset can drift from `scenarios.json`.
+- **Four import slots**, each with its own explicit mapping profile and a mapping preview built from
+  `getMapping(table, profile)`; the options come from `supportedProfiles(table)`. A profile is never
+  inferred from a filename. A loaded file whose header lacks a mapped column says so in the preview
+  as a statement about the header, not as a verdict.
+- Files are read in the browser with `FileReader`. **One request token per slot**: a read that a
+  newer pick, a removal, a profile change, or a reset superseded is discarded instead of landing.
+  Size is checked against `File.size` before reading; the record and column caps run through
+  `parseCsv` before the engine sees the text, so the caps are not re-implemented. Over-limit input
+  is refused per slot with a reason; a broken-quoting or short-record file is *not* refused, because
+  those are diagnostics the report exists to explain.
+- Importing or removing any file marks the bundle `USER_SUPPLIED_UNVERIFIED` and relabels the header
+  badge. Reset baseline reloads S00 and restores `SYNTHETIC`. A profile change leaves the origin
+  alone (the data's provenance did not change) but does invalidate the result.
+- **Regression dashboard**: a user-triggered sweep of all 18 bundled cases against
+  `expected-results.json`, using the same projection as `fixture-oracles.test.ts`. It reads bundled
+  fixtures only and cannot see or change the workspace bundle. `firstDifference` is exported so the
+  comparison itself is tested for actually detecting a mismatch.
+- **JSON export**: enabled only while the report matches the current inputs. The payload carries the
+  engine's statuses, counts, rule coverage, diagnostics, and checks with their cited source cells,
+  plus provenance and a stated-limitations list. The CSV text and raw tables are excluded.
+
+Two deliberate decisions worth knowing:
+- The **AI report switch is disabled for a customized bundle.** The request names a bundled scenario
+  that the server re-evaluates itself, so there is nothing for it to reproduce, and user CSV content
+  is never sent anywhere. `runChecks` also refuses to start a request in that state, so a stale
+  toggle cannot leak one.
+- **Run checks is disabled while a file is being read**, and no report is current during a read.
+  A failed read leaves the bundle and any existing result untouched and reports the failure at the
+  slot.
+
+Gates re-run in `web/`: typecheck, lint, **159 Vitest tests in 9 files**, production build with no
+API key, and **44 Playwright Chromium checks**, all PASSED. Screenshots:
+`web/artifacts/m3-{import-section,regression,controls}.png`. No live provider call was made.
 
 ## Visual upgrade, 2026-09-10 (later session)
 An authorized bounded visual upgrade added the interactive order schedule and a linked evidence
@@ -100,8 +149,10 @@ No engine, fixture, AI protocol or provider behaviour changed, and no live call 
 ## What actually works
 - One screen preloading the S00 baseline. Inputs and the submitted plan are visible immediately,
   and every derived column reads "Not evaluated" until the user runs checks.
-- Three demo cases reachable in one click: S00 baseline, S01 earlier departure, S02 missing packing
-  duration. The other fifteen frozen cases are loaded in the fixture pack but have no UI.
+- All eighteen frozen cases reachable from one Scenario selector, S00 default. Four import slots
+  accept your own CSV exports, each with an explicit mapping profile and a live mapping preview.
+  A regression panel sweeps all eighteen cases against the frozen expectations on demand, and the
+  current report can be downloaded as JSON.
 - Real `Run checks` and `Reset baseline`. Both replace the whole four-file bundle with a fresh deep
   clone, clear the selected evidence and the source highlight, and invalidate the previous report.
 - The real pipeline: CSV parsing → explicit mapping profile → data-readiness validation → R1–R5
@@ -147,25 +198,28 @@ No engine, fixture, AI protocol or provider behaviour changed, and no live call 
 | Screenshots and evidence | `web/artifacts/` |
 
 ## Verified this session
-See `VERIFICATION.md` for the full record. Summary: typecheck, lint, 128 Vitest tests (including
-all 18 frozen fixtures), production build with no API key, and 31 Playwright Chromium checks all
-PASSED; seed copies are byte-identical to `seed-data/`.
+See `VERIFICATION.md` for the full record. Summary: typecheck, lint, 159 Vitest tests (including all
+18 frozen fixtures), production build with no API key, and 44 Playwright Chromium checks all PASSED;
+seed copies are byte-identical to `seed-data/`. The example files in `seed-data/import-examples/`
+were imported through the real file picker in the browser and reproduced the bundled S00 result.
 
-**Not verified:** keyboard-only traversal end to end, any assistive-technology pass, an automated
-axe scan, 200% text enlargement, and the user text-spacing override test. The briefing browser
+**Not verified:** keyboard-only traversal end to end (including the new import controls), any
+assistive-technology pass, an automated axe scan, 200% text enlargement, the user text-spacing
+override test, and a real over-limit file picked in the browser (the caps are asserted at the unit
+boundary instead). The briefing browser
 checks remain mocked-provider checks by design; the live path is covered by the recorded smoke
 calls instead.
 
 ## Deliberately deferred, still required for M0–M4
-Real local CSV replacement/upload UI and the mapping-profile switcher; the regression-results
-dashboard and in-app 18-case runner; JSON report export; exhaustive unit coverage beyond the
-focused set; production hardening. These are omitted from the UI entirely rather than shown as
-inert controls.
+Exhaustive unit coverage beyond the focused set, and production hardening. The CSV replacement UI,
+the mapping-profile switcher, the in-app 18-case runner, and JSON export were delivered on
+2026-09-11 and are no longer deferred.
 
 ## Exact next task
-Nothing is outstanding for the AI report feature. The remaining backlog is unchanged and unstarted:
-end-to-end keyboard-only traversal, an assistive-technology pass, broader edge-case coverage, the
-CSV replacement/mapping UI, and the regression dashboard with JSON export. See `DEMO.md`.
+The remaining M4 items: end-to-end keyboard-only traversal (start with the import slots, where the
+visible label mirrors the real file input's focus ring), an assistive-technology pass, and the
+owner demo rehearsal. See `DEMO.md`, which still describes the three-case toolbar and should be
+re-read against the current selector before rehearsing.
 
 If a future live call is ever withheld, that is the gates working. Do not add retries or loosen a
 gate to make a live call pass.

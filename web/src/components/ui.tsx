@@ -139,6 +139,37 @@ export function Pill({
   );
 }
 
+/**
+ * One reusable native disclosure for the secondary inspection tools.
+ *
+ * `<details>` gives correct keyboard and screen-reader behaviour without a
+ * hand-rolled widget, and the summary row is a comfortable target.
+ */
+export function Disclosure({
+  summary,
+  hint,
+  children,
+  open = false,
+}: {
+  summary: string;
+  hint?: string;
+  children: ReactNode;
+  open?: boolean;
+}) {
+  return (
+    <details open={open} className="ops-panel group">
+      <summary className="flex min-h-[3.25rem] cursor-pointer list-none items-center gap-3 px-6 py-4">
+        <span className="text-ink-muted transition-transform group-open:rotate-90">
+          <ChevronGlyph open={false} className="h-4 w-4" />
+        </span>
+        <span className="ops-panel-title text-ink">{summary}</span>
+        {hint ? <span className="ops-meta hidden text-ink-muted sm:inline">{hint}</span> : null}
+      </summary>
+      <div className="border-t border-line">{children}</div>
+    </details>
+  );
+}
+
 export function Panel({
   title,
   subtitle,

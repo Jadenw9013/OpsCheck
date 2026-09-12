@@ -176,11 +176,72 @@ body {
   border-color: var(--color-line);
 }
 
+/*
+ * Native select at control height. `appearance: none` plus an inline chevron so
+ * the eighteen scenarios and the per-slot profiles look like the other
+ * controls, while keeping the platform's own keyboard and listbox behaviour.
+ */
+.ops-select {
+  display: inline-block;
+  inline-size: auto;
+  min-block-size: 2.75rem;
+  padding: 0.5rem 2.25rem 0.5rem 0.75rem;
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-control);
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+  font-size: 1rem;
+  line-height: 1.5;
+  font-weight: 500;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23475569' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 0.875rem;
+  transition:
+    border-color 120ms,
+    color 120ms;
+}
+
+.ops-select:hover:not(:disabled) {
+  border-color: var(--color-accent);
+}
+
+.ops-select:disabled {
+  cursor: not-allowed;
+  background-color: var(--color-sunken);
+  color: var(--color-ink-muted);
+  border-color: var(--color-line);
+}
+
+/* The compact variant used inside a file slot. */
+.ops-select--sm {
+  min-block-size: 2.5rem;
+  padding: 0.375rem 2rem 0.375rem 0.625rem;
+  font-size: 0.875rem;
+}
+
 /* A strong, single focus treatment on every interactive element. */
 :focus-visible {
   outline: 3px solid var(--color-info);
   outline-offset: 3px;
   border-radius: 3px;
+}
+
+/*
+ * File import: the native input is the real control and keeps its own focus and
+ * keyboard behaviour, while its label is the visible button. The label mirrors
+ * the input's focus ring, so there is one control and one tab stop rather than
+ * a decorative button clicking a hidden input.
+ */
+.ops-file-label {
+  cursor: pointer;
+}
+
+.ops-file-input:focus-visible + .ops-file-label {
+  outline: 3px solid var(--color-info);
+  outline-offset: 3px;
 }
 
 .ops-inline-link {

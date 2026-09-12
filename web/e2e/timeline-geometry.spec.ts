@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { EARLIER_DEPARTURE, MISSING_PACK, selectScenario } from './scenario';
 
 /**
  * Timeline geometry regression.
@@ -144,7 +145,7 @@ test('an axis tick and a departure at the same minute align exactly', async ({ p
 });
 
 test('geometry holds for the earlier-departure case, including the overrun', async ({ page }) => {
-  await page.getByRole('button', { name: /^Earlier departure/ }).click();
+  await selectScenario(page, EARLIER_DEPARTURE);
   await page.getByRole('button', { name: 'Run checks' }).click();
   await expect(page.getByRole('region', { name: 'Order schedule' })).toContainText('+10 min late');
 
@@ -163,7 +164,7 @@ test('geometry holds for the earlier-departure case, including the overrun', asy
 });
 
 test('every plotted element stays within the plotting area', async ({ page }) => {
-  await page.getByRole('button', { name: /^Earlier departure/ }).click();
+  await selectScenario(page, EARLIER_DEPARTURE);
   await page.getByRole('button', { name: 'Run checks' }).click();
 
   const axis = await plotBox(page, 'axis');
@@ -187,7 +188,7 @@ test('every plotted element stays within the plotting area', async ({ page }) =>
 
 test('geometry also holds at narrow width, accounting for local scrolling', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.getByRole('button', { name: /^Earlier departure/ }).click();
+  await selectScenario(page, EARLIER_DEPARTURE);
   await page.getByRole('button', { name: 'Run checks' }).click();
   await expect(page.getByRole('region', { name: 'Order schedule' })).toContainText('+10 min late');
 
@@ -239,14 +240,14 @@ test('narrow bars drop their label instead of showing clipped text', async ({ pa
 test('scenario copy describes the input change, not the expected outcome', async ({ page }) => {
   const controls = page.getByRole('region', { name: 'Scenario and checks' });
 
-  await page.getByRole('button', { name: /^Earlier departure/ }).click();
+  await selectScenario(page, EARLIER_DEPARTURE);
   // Describes the input that changed.
   await expect(controls).toContainText('D-1 moved earlier to 09:05');
   // Does not pre-announce the evaluated conclusion.
   await expect(controls).not.toContainText('ten minutes late');
   await expect(controls).not.toContainText('modeled ready');
 
-  await page.getByRole('button', { name: /^Missing packing duration/ }).click();
+  await selectScenario(page, MISSING_PACK);
   await expect(controls).toContainText('packing duration for order O-104 left blank');
   await expect(controls).not.toContainText('must not run');
 

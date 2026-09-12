@@ -41,9 +41,10 @@ const TABLES: TableKind[] = ['orders', 'departures', 'workers', 'plan'];
 
 export const BASELINE_SCENARIO_ID = 'S00';
 
-/** The three cases wired into tonight's demo toolbar. */
-export const DEMO_SCENARIO_IDS: readonly string[] = ['S00', 'S01', 'S02'];
-
+/**
+ * Every bundled case, in pack order. The toolbar renders this list directly, so
+ * there is no second hardcoded subset that can drift away from the fixtures.
+ */
 export const scenarioList: ScenarioMeta[] = pack.scenarios.map((s) => ({
   id: s.id,
   title: s.title,

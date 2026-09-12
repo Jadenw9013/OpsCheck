@@ -1,7 +1,8 @@
 # Verification — actual evidence only
 
 ## Scope of this record
-This page records two passes on 2026-09-10:
+The newest pass is **M3, 2026-09-11** (see its section immediately below). Before it, this page
+records two passes on 2026-09-10:
 
 1. the **fast-track demo** pass, and
 2. the later **visual upgrade** pass (order schedule and linked evidence inspector).
@@ -13,6 +14,63 @@ this page includes a check that did not run.
 **Read `Current status` below for what holds now.** Sections marked *first pass* are retained as
 accurate historical evidence of what was run at the time; they describe superseded suites and, in
 one case, UI that no longer exists. Do not read them as current.
+
+## M3 pass, 2026-09-11 (CSV import, profile switcher, regression dashboard, JSON export)
+No engine, contract, fixture, AI protocol, or provider behaviour changed. `src/domain/` was not
+modified. **No live Anthropic call was made in this pass.**
+
+### Commands actually run, in `web/`
+| Command | Result | Evidence |
+|---|---|---|
+| `npm run typecheck` | PASSED | exit 0, no output |
+| `npm run lint` | PASSED | exit 0, no findings |
+| `npm test` | PASSED | 159 tests in 9 files |
+| `npm run build` | PASSED | compiled; `/` and `/_not-found` static, `/api/briefing` dynamic; no API key present |
+| `npm run test:e2e` | PASSED | 44 Playwright Chromium checks against the production build |
+
+Gates were run after each of the four steps as well as at the end; the counts above are the final
+run. Test totals went 128 -> 137 -> 150 -> 159 as the new suites were added, and browser checks 31
+-> 44.
+
+### What the new tests actually assert
+| Area | File | Assertion |
+|---|---|---|
+| Import caps | `tests/import-limits.test.ts` | A file at exactly 262,144 bytes, 100 records, and 32 columns is accepted; one byte, one record, or one column more is refused with a reason. A broken-quoting, short-record, blank-cell, or header-only file is *not* refused: those are diagnostics the report must explain. |
+| Regression runner | `tests/regression-runner.test.ts` | All 18 cases match their frozen expectation through the same projection `fixture-oracles.test.ts` uses; the sweep is repeatable; and the comparison itself detects a changed number, a missing key, an extra key, a changed array length, and a changed type, so a green dashboard is not vacuous. |
+| JSON export | `tests/export-report.test.ts` | The payload carries the engine's statuses, counts, rule coverage, and every check with its cited source cells; excludes the CSV text and the raw tables; names the file for the case or `custom`; and exports a blocked evaluation as blocked with five blocked rule families, never as a pass. |
+| Browser | `e2e/import-and-regression.spec.ts` | 13 checks, listed below. |
+
+### Upload examples verified in the browser
+`seed-data/import-examples/*.csv` are byte-identical to the corresponding bundled fixtures
+(verified by comparison before the checks were written), so importing them must reproduce the
+bundled result exactly.
+
+| Check | Status | Evidence |
+|---|---|---|
+| The four standard examples reproduce the bundled S00 result | PASSED | after import: `44 passed / 0 failed / 0 blocked`, `8 orders / 2 departures / 2 workers / 8 assignments` |
+| Warehouse B examples map cleanly under the Warehouse B profile | PASSED | no missing column reported; same `44 passed / 0 failed / 0 blocked` through different column names |
+| `orders_missing_pack.csv` blocks evaluation instead of assuming zero | PASSED | "Cannot evaluate this plan.", no passing claim anywhere on the page |
+| Imported data is labelled user-supplied and unverified | PASSED | header badge changes; export payload carries `USER_SUPPLIED_UNVERIFIED` and `scenarioId: null` |
+| Reset baseline restores the untouched synthetic fixture | PASSED | badge returns to "Synthetic data", `orders.csv` is back in the slot, result cleared |
+| Removing a file invalidates the result and then blocks evaluation | PASSED | "Inputs changed. Run checks again.", then "Cannot evaluate this plan." |
+| Switching a mapping profile invalidates the result | PASSED | green badge gone immediately; preview switches to the other profile's columns |
+| The 18-case sweep runs only when asked, and matches | PASSED | "Not run in this session." until the button is pressed; then 18 of 18 matched, 0 FAIL badges |
+| The sweep does not disturb the workspace | PASSED | S01's own result still reads `43 passed / 1 failed / 0 blocked` after a sweep |
+| A stale report cannot be exported | PASSED | Download disabled before a run and again after inputs change |
+| The exported file is named and shaped correctly | PASSED | `opscheck-report-S01-<YYYYMMDDHHmm>.json`, parsed and asserted in the browser; no CSV text present |
+| All 18 cases are reachable from the selector | PASSED | 18 options; S00 default; Reset disabled on an untouched baseline |
+
+### Screenshots
+`web/artifacts/m3-import-section.png`, `web/artifacts/m3-regression.png`,
+`web/artifacts/m3-controls.png`, taken at 1440x1000 against the production build.
+
+### Not verified in this pass
+| Item | Status | Note |
+|---|---|---|
+| Keyboard-only traversal of the new controls | NOT RUN | The file input is the real control and keeps its own focus, with the visible label mirroring its focus ring, but no end-to-end keyboard run was performed. |
+| Assistive-technology pass | NOT RUN | Slots are labelled groups and the selects have real labels; no assistive technology was used. |
+| A real over-limit file through the picker | NOT RUN | The caps are asserted at the unit boundary, not by picking a 300 KiB file in the browser. |
+| AI report with imported files | N/A by design | The switch is disabled for a customized bundle: the request names a bundled scenario the server re-evaluates, so user CSV content is never sent. |
 
 ## Presentation redesign, 2026-09-10
 A bounded design retrofit against `opscheck-design-system/`. No engine, contract, fixture, AI
@@ -322,16 +380,16 @@ and column names, which broke the strict id grammar and would have leaked intern
 payload. Catalog ids are now short opaque handles, with the authoritative engine key retained in
 `resultRef` so provenance is unaffected.
 
-## Current status, as of the visual upgrade pass
-The feature set is frozen. Last actually-run results:
+## Current status, as of the M3 pass, 2026-09-11
+Last actually-run results:
 
 | Check | Status | Evidence |
 |---|---|---|
 | TypeScript (`npm run typecheck`) | PASSED | exit 0 |
 | ESLint (`npm run lint`) | PASSED | exit 0 |
-| Vitest (`npm test`) | PASSED | 128 tests, 6 files |
+| Vitest (`npm test`) | PASSED | 159 tests, 9 files |
 | Production build (`npm run build`) | PASSED | compiled; `/` and `/_not-found` static |
-| Playwright Chromium (`npx playwright test`) | PASSED | 31 tests, production build |
+| Playwright Chromium (`npm run test:e2e`) | PASSED | 44 tests, production build |
 | Seed copies byte-identical to `seed-data/` | PASSED | sha256 pairs below |
 | Full 18-case regression parity | PASSED | all 18 frozen fixtures asserted in `fixture-oracles.test.ts` |
 | Live Anthropic API call (V1 smoke) | PASSED | 3 calls via `npm run smoke:ai`; all verified, 7/7 gates each |
@@ -528,8 +586,9 @@ Real Chromium screenshots of the running production build, in `web/artifacts/`:
 | Narrow-layout review | PASSED | 390×844, 0px overflow, after fixing a 35px legend overflow |
 | Keyboard-only traversal review | NOT RUN | schedule rows and controls are real buttons and focus styling exists, but no end-to-end keyboard run was performed |
 | Screen-reader pass | NOT RUN | ARIA roles and labels present; no assistive technology was used |
-| Actual file replacement and profile mapping | DEFERRED | no upload UI this session |
-| Stale results cannot be exported as current | DEFERRED | no export this session |
+| Actual file replacement and profile mapping | PASSED | M3 pass: four import slots, per-slot explicit profiles, mapping preview; the standard examples reproduce the bundled S00 result |
+| Stale results cannot be exported as current | PASSED | M3 pass: Download disabled unless the report matches the current inputs; asserted in `e2e/import-and-regression.spec.ts` |
+| In-app 18-case regression sweep | PASSED | M3 pass: 18 of 18 matched, with the comparison itself tested for detecting a mismatch |
 | External-network / confidentiality review | NOT RUN | app makes no network calls by construction; not audited |
 | Owner demo rehearsal | NOT RUN | script written in HANDOFF.md, not rehearsed with the owner |
 
